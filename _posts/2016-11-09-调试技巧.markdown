@@ -1,0 +1,119 @@
+title: 调试技巧
+date: 2016-11-09 09:21:06
+updated: 2017-02-22 20:31:16
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+---
+# 1 调试标记
+
+## 1.1 预处理器调试标记
+
+通过使用预处理器`#define`定义一个或更多的调试标记(在头文件中更适合)，可以测试一个使用`#ifdef`语句和包含条件调试代码的标记。当认为调试完成了，只需使用`#undef`标记，代码就会自动消失。
+为了区分预处理器标记和标量，预处理器标记一般用大写字母书写，一个常用的标记名是`DEBUG`。
+语句序列可以如下:
+
+```c
+#define DEBUG //在头文件中更适合
+//...
+#ifdef DEBUG // 检测是否定义了预处理器标记
+/* 调试代码 */
+#endif 
+```
+
+一个更明显的例子，使用了`printf`作为调试语句输出，并且采用的是`if`预处理调试检测：
+
+```c
+#define DEBUG_PRINT_ON 1
+
+#if DEBUG_PRINT_ON //当DEBUG_PRINT_ON不为0时，执行printf输出
+	#define DEBUG_PRINT(fmt,args...) printf (fmt, ##args)// 定义该语句为printf输出
+#else
+	#define DEBUG_PRINT(fmt,args...) //定义该语句为空
+#endif
+```
+ 大多数C和C++程序实现还允许在编译器的命令行中使用`#define`和`#undef`标记，所以可以使用一个单独的命令重新编译代码并插入调试信息。
+ 
+## 1.2 运行期调试标记
+在某些情况下，在程序期间打开和关闭调试标记还会更加方便，特别是使用命令行在启动程序时设置他们，因为只是为了插入调试代码来重新编译一个大程序是很乏味的。
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+// Debug flags aren't necessarily global:
+bool debug = false;
+
+int main(int argc, char* argv[]) {
+	for (int i = 0; i < argc; i++)
+		if (string(argv[i]) == "--debug=on")
+			debug = true;
+	bool go = true;
+	while (go) {
+		if (debug) {
+			// Debugging code here
+			cout << "Debugger is now on!" << endl;
+		} else {
+			cout << "Debugger is now off." << endl;
+		}
+		cout << "Turn debugger [on/off/quit]: ";
+		string reply;
+		cin >> reply;
+		if (reply == "on") debug = true; // Turn it on
+		if (reply == "off") debug = false; // Off
+		if (reply == "quit") break; // Out of 'while'
+	}
+} ///:~
+```
+上述程序一直允许打开和关闭调试标记，知道输入`quit`告诉他想要退出。在程序启动时，使用命令行参数`string(argv[i])`，并对其进行测试，看是否为`--debug=on`，是则打开调试器。也可以寻找`--debug=`，然后看他后面是什么，以提供更多的选择。
+
+# 2 把变量和表达式转换成字符串
+
+写调试代码时，编写打印表达式是很乏味的，此时可以使用字符串化运算符`#`，将一个参数转换成一个字符数组， 把这一点与没有插入标点符号的若干个字符数组结合而连接成一个单独的字符数组，生成一个十分方便的宏用于调试期间打印出变量的值。
+
+```c++
+#define PR(x) cout << #x " = " << x << endl;
+```
+
+如果使用宏*PR(a)*来打印变量*a*的值，他和下面的代码又同样的效果：
+
+```c++
+cout << "a = " << a << endl;
+```
+而在不想调试时，可以插入一个`#ifdef`定义使得*PR(x)*不起作用。
+
+# 3 assert宏
+
+在C++标准头文件`<cassert>`中，可以使用`assert`进行断言，给定一个参数，即表示一个断言是否为真的表达式，预处理器产生测试该断言的代码。如果断言不为真，则在发出一个错误信息告诉断言是什么以及他失败之后，程序会终止。
+
+```c++
+#include <cassert>  // Contains the macro
+using namespace std;
+
+int main() {
+	int i = 100;
+	assert(i != 100); // 检测i不等于100，断言不为真，从而触发错误 
+} ///:~
+```
+
+这个宏来源于标准C，所以在头文件`assert.h`也可以使用。
+当完成调试后，可以在程序的`#include<cassert>`之前插入语句行`#define NDEBUG`，从而消除宏产生的代码。
+
+# 4 用于代码跟踪的宏
+
+某些情况下，在程序执行过程中将执行到的每一条语句行代码打印到`cout`或一个跟踪文件是很有用处的。下面是一个能够完成这种功能的预处理宏：
+
+```c
+#define TRACE(ARG) cout << #ARG << endl; ARG
+```
+
+下面是TRACE宏的一个变种：
+
+```c
+#define D(a) cout << #a "=[" << a << "]" << endl;
+```
+如果要想显示一个表达式，只需用他作为参数调用D()。程序执行会显示这个表达式，接着显示他的值(假设这个表达式的结果类型重载了运算符<<)。

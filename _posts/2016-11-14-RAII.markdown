@@ -1,0 +1,17 @@
+title: RAII
+date: 2016-11-14 20:06:45
+updated: 2017-02-21 16:13:56
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+- Effective
+---
+# 1 RAII handle
+
+`RAII`，即`资源获取即初始化`，可以说是`C++`语言区别于其他所有编程原因的最重要的特性，一个不懂`RAII`的`C++`程序员不是一个合格的`C++`程序员。
+初学`C++`的教条是**new和delete要配对，new了之后记得要delete**。但如果使用`RAII`，则要改成**每一个明确的资源配置动作(例如new)都应该在单一语句执行，并在该语句中立刻将配置获得的资源交给handle对象(例如shared_ptr)，程序中一般不出现delete**。
+`shared_ptr`是管理共享资源的例子，需要注意避免循环引用，通常 做法是`owner`持有指向`child`的`shared_ptr`，`child`持有指向`owner`的`weak_ptr`。
