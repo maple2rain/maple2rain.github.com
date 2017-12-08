@@ -4,8 +4,7 @@ title: Electron跨平台UI框架
 date: 2017-11-28 14:51:34
 updated: 2017-11-29 17:57:04
 categories: Electron
-excerpt: 本文初步介绍`Electron`为何物，并且介绍部分环境搭建及后续打包等操作。
-![](../post_img/5a1d20beab64416ff30029b6)
+excerpt: 本文初步介绍`Electron`为何物，并且介绍部分环境搭建及后续打包等操作。![](../post_img/5a1d20beab64416ff30029b6)
 tags:
 - Electron
 ---
