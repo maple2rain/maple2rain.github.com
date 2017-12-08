@@ -4,6 +4,8 @@ title: Electron跨平台UI框架
 date: 2017-11-28 14:51:34
 updated: 2017-11-29 17:57:04
 categories: Electron
+excerpt: 本文初步介绍`Electron`为何物，并且介绍部分环境搭建及后续打包等操作。
+![](../post_img/5a1d20beab64416ff30029b6)
 tags:
 - Electron
 ---
@@ -298,7 +300,11 @@ asar pack <dir>/app app.asar
 # 引用
 
 [1] [Electron的本质](http://www.open-open.com/lib/view/open1479349380061.html)
+
 [2] [使用electron构建跨平台Node.js桌面应用经验分享](http://www.zhangxinxu.com/wordpress/2017/05/electron-node-js-desktop-application-experience/)
+
 [3] [Electron文档](https://electronjs.org/docs)
+
 [4] [Electron教程](https://www.w3cschool.cn/electronmanual/wcx31ql6.html)
+
 [5] [Electron开发桌面应用](https://github.com/pfan123/electron-docs)
