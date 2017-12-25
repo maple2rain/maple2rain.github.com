@@ -1,4 +1,5 @@
 ---
+layout: post
 title: Cache替换算法总结
 date: 2016-08-10 19:36:29
 updated: 2017-02-21 16:15:48
@@ -11,6 +12,9 @@ categories:
 - Advanced
 ---
 
+
+* content
+{:toc}
 
 本文主要介绍关于Cache的一些知识点，包括存储器知识及Cache算法。
 
