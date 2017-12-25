@@ -1,8 +1,5 @@
 ---
 layout: post
-author: LPF
----
-layout: post
 title: 主存与Cache的地址映像
 date: 2016-08-10 19:34:42
 updated: 2017-02-21 16:15:46
