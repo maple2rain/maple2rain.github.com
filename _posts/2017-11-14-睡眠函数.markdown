@@ -1,3 +1,5 @@
+---
+layout: post
 title: 睡眠函数
 date: 2017-11-14 15:04:23
 updated: 2017-11-14 15:11:55
@@ -5,10 +7,17 @@ categories:
 - Study
 - BugCollections
 - Linux
+author: LPF
 ---
+
+* content
+{:toc}
+
 ## 问题
 
 在开发使用睡眠函数让线程挂起时，遇到线程挂起很久迟迟不醒来的问题。后来才发现，是睡眠`太久了`。
+实际上是函数使用错误的问题。
+
 
 ## 解决
 
