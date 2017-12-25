@@ -1,3 +1,5 @@
+---
+layout: post
 title: UEFI下安装双系统Windows+Linux
 date: 2017-06-20 21:22:24
 updated: 2017-06-20 21:55:08
@@ -7,8 +9,17 @@ categories:
 - Study
 - Computer
 - Tools
+author: LPF
 ---
+
+* content
+{:toc}
+
 > 在UEFI下，相信在安装双系统时会遇到一个问题：先有windows再装Linux，会发现没有出现Linux的引导项而是直接进入Windows。本文主要介绍解决方法，在宏碁TMTX50测试通过。
+
+
+
+
 
 # 安装前准备
 

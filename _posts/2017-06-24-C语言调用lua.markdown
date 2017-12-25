@@ -1,3 +1,5 @@
+---
+layout: post
 title: C语言调用lua
 date: 2017-06-24 15:50:57
 updated: 2017-06-24 15:52:10
@@ -6,6 +8,7 @@ categories:
 - Computer
 - PL
 - Lua
+author: LPF
 ---
 # 编译
 

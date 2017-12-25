@@ -1,3 +1,5 @@
+---
+layout: post
 title: JNI方法未实现问题
 date: 2017-11-13 18:01:11
 updated: 2017-11-15 16:53:47
@@ -5,10 +7,18 @@ categories:
 - Study
 - BugCollections
 - Java
+author: LPF
 ---
+
+* content
+{:toc}
+
 ## 问题
 
 在使用JNI时，已经在java文件里定义了`native`方法声明并在*cpp*文件中实现了方法，但还是出现`java.lang.UnsatisfiedLinkError: No implementation found for...`。
+
+
+
 
 ## 解决
 
