@@ -9,7 +9,7 @@ categories:
 - Study
 - Computer
 - Hardware
-- advanced
+- Advanced
 ---
 
 * content
