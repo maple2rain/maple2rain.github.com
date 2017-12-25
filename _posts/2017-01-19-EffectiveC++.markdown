@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Effective C++
 date: 2017-01-19 12:11:01
 updated: 2017-02-23 09:39:22

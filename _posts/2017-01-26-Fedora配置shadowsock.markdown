@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Fedora配置shadowsock
 date: 2017-01-26 15:24:47
 updated: 2017-05-24 22:52:36

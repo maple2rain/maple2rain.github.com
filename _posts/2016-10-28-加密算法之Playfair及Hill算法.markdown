@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 加密算法之Playfair及Hill算法
 date: 2016-10-28 00:50:39
 updated: 2017-05-06 17:42:56

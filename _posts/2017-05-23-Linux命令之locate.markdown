@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之locate
 date: 2017-05-23 22:57:41
 updated: 2017-05-23 23:09:17

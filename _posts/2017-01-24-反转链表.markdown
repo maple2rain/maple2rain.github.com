@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 反转链表
 date: 2017-01-24 12:56:41
 updated: 2017-01-24 13:08:33

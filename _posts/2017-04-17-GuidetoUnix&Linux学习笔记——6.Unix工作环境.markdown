@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 6.Unix 工作环境
 date: 2017-04-17 15:22:55
 updated: 2017-05-19 16:17:35

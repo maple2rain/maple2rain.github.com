@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux启动过程
 date: 2017-03-08 16:58:42
 updated: 2017-03-08 17:04:32

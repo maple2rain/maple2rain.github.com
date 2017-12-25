@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Bash Shell提示符
 date: 2017-01-05 16:34:49
 updated: 2017-01-05 16:34:59

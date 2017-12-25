@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之colrm
 date: 2017-05-20 22:33:58
 updated: 2017-05-21 11:07:28

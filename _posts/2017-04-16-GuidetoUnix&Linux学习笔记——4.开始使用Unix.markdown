@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 4.开始使用Unix
 date: 2017-04-16 22:20:48
 updated: 2017-05-19 16:17:43

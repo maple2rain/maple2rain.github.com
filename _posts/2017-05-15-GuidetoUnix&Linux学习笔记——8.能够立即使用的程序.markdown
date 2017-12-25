@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 8.能够立即使用的程序
 date: 2017-05-15 21:38:23
 updated: 2017-05-19 16:17:28

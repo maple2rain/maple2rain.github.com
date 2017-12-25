@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 立即寻址
 date: 2016-10-30 13:40:50
 updated: 2017-02-21 16:11:31

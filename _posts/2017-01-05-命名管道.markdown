@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 命名管道
 date: 2017-01-05 16:56:19
 updated: 2017-01-05 17:02:56

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 设计Min栈
 date: 2017-02-09 20:52:14
 updated: 2017-02-09 21:06:35

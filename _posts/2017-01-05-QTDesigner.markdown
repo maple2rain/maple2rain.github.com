@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: QT Designer
 date: 2017-01-05 13:44:22
 updated: 2017-01-05 16:00:57

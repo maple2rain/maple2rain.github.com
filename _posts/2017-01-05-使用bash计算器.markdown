@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 使用bash计算器
 date: 2017-01-05 16:43:58
 updated: 2017-01-05 17:21:30

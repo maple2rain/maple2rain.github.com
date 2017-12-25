@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 记雨淋
 date: 2017-05-16 15:35:05
 updated: 2017-05-16 15:38:05

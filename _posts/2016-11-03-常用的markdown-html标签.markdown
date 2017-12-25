@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 常用的markdown-html标签
 date: 2016-11-03 15:09:03
 updated: 2017-02-21 16:17:09

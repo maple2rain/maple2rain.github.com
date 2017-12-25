@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之find
 date: 2017-05-24 19:53:26
 updated: 2017-06-24 12:04:47

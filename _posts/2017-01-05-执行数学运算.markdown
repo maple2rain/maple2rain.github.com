@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 执行数学运算
 date: 2017-01-05 16:57:28
 updated: 2017-01-05 17:02:58

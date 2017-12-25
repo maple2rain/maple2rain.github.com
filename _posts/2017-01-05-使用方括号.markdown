@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 使用方括号
 date: 2017-01-05 16:57:03
 updated: 2017-01-05 17:03:00

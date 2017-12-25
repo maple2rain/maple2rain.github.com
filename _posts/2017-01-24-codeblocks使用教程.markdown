@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: codeblocks使用教程
 date: 2017-01-24 14:57:35
 updated: 2017-01-24 15:02:52

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 卓越代码
 date: 2016-08-10 20:06:35
 updated: 2017-02-21 15:14:49

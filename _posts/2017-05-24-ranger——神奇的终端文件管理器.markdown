@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: ranger——神奇的终端文件管理器
 date: 2017-05-24 22:46:28
 updated: 2017-05-24 22:52:29

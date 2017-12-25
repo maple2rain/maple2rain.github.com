@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 数据挖掘重点
 date: 2017-06-05 19:51:14
 updated: 2017-06-08 22:23:07

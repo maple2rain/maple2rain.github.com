@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之tr
 date: 2017-05-22 11:39:38
 updated: 2017-05-22 12:35:26

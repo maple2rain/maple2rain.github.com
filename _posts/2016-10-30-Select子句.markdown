@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Select子句
 date: 2016-10-30 09:30:53
 updated: 2017-02-21 15:16:03

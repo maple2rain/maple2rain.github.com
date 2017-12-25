@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 随机等概率的输出m个不重复的数
 date: 2017-03-13 19:04:44
 updated: 2017-03-13 19:29:19

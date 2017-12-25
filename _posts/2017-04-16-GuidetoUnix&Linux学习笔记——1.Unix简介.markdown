@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 1.Unix 简介
 date: 2017-04-16 10:40:52
 updated: 2017-05-19 16:17:53

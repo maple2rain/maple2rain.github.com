@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Xournal——Linux下好用的笔记软件
 date: 2017-03-23 21:51:51
 updated: 2017-04-28 11:03:48

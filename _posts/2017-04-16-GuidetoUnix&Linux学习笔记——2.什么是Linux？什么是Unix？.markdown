@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 2.什么是Linux？什么是Unix？
 date: 2017-04-16 12:01:16
 updated: 2017-05-19 16:17:50

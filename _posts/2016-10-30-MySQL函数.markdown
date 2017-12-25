@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: MySQL函数
 date: 2016-10-30 09:29:41
 updated: 2017-02-21 15:15:50

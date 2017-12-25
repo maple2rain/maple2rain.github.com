@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之shred
 date: 2017-05-23 21:30:49
 updated: 2017-05-23 22:08:02

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 操作数尺寸
 date: 2016-10-30 13:38:45
 updated: 2017-02-21 16:17:59

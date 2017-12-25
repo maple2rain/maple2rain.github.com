@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之split
 date: 2017-05-20 21:14:22
 updated: 2017-05-20 22:23:40

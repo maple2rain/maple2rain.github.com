@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之grep
 date: 2017-05-21 20:11:17
 updated: 2017-05-21 23:15:02

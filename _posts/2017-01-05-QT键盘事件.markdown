@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: QT键盘事件
 date: 2017-01-05 14:42:21
 updated: 2017-01-05 16:01:58

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 二叉树最小共同祖先
 date: 2017-01-25 22:53:34
 updated: 2017-01-25 23:22:24

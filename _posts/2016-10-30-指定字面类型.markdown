@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 指定字面类型
 date: 2016-10-30 13:29:09
 updated: 2017-02-21 15:02:19

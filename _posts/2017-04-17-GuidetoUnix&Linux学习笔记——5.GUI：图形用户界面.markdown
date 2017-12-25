@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 5.GUI：图形用户界面
 date: 2017-04-17 14:34:22
 updated: 2017-05-19 16:17:39

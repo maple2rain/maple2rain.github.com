@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记——13.使用shell
 date: 2017-05-19 11:21:23
 updated: 2017-05-20 15:09:09

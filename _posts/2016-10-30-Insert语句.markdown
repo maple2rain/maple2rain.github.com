@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Insert语句
 date: 2016-10-30 09:29:00
 updated: 2017-02-21 15:15:43

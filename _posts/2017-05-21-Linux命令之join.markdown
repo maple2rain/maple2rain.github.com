@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之join
 date: 2017-05-21 22:11:20
 updated: 2017-05-21 23:14:16

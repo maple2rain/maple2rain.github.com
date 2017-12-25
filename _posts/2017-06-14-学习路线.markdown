@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 学习路线
 date: 2017-06-14 11:16:54
 updated: 2017-06-14 20:29:24

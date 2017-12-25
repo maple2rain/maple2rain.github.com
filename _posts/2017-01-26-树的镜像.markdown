@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 树的镜像
 date: 2017-01-26 00:27:46
 updated: 2017-01-26 00:40:55

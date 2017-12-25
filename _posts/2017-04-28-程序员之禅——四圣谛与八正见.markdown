@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 程序员之禅——四圣谛与八正见
 date: 2017-04-28 15:58:35
 updated: 2017-04-28 17:30:05

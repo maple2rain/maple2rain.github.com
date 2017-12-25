@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: codeblocks常见问题
 date: 2017-01-14 11:05:11
 updated: 2017-05-09 17:14:32

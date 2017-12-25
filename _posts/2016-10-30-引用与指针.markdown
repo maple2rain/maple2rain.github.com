@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 引用与指针
 date: 2016-10-30 13:28:36
 updated: 2017-02-21 15:02:29

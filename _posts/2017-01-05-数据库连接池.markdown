@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 数据库连接池
 date: 2017-01-05 11:41:25
 updated: 2017-01-05 16:01:12

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 参数替换
 date: 2017-01-05 16:37:49
 updated: 2017-01-05 17:01:47

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 记2017CVTE实习生招聘内推面试
 date: 2017-03-03 15:41:09
 updated: 2017-03-03 16:57:14

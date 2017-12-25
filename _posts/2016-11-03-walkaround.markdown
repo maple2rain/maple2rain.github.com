@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: walk around
 date: 2016-11-03 21:32:10
 updated: 2017-02-21 16:04:47

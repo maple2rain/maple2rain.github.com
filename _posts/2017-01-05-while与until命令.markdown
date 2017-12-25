@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: while与until命令
 date: 2017-01-05 16:49:24
 updated: 2017-01-05 17:02:24

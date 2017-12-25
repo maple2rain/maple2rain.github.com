@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 与终端对话
 date: 2017-01-05 16:25:06
 updated: 2017-01-05 16:30:26

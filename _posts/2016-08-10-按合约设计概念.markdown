@@ -1,5 +1,8 @@
 ---
 layout: post
+author: LPF
+---
+layout: post
 title: 按合约设计概念
 date: 2016-08-10 20:12:20
 updated: 2017-02-21 15:14:46

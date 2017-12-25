@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 神奇的位运算
 date: 2017-01-15 08:46:47
 updated: 2017-01-15 10:54:15

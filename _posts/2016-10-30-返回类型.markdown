@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 返回类型
 date: 2016-10-30 13:30:45
 updated: 2017-02-21 16:00:26

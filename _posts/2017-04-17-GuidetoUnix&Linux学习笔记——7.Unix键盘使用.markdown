@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 7.Unix 键盘使用
 date: 2017-04-17 19:44:01
 updated: 2017-05-19 16:17:32

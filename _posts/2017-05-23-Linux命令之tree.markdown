@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之tree
 date: 2017-05-23 17:14:32
 updated: 2017-05-23 17:26:36

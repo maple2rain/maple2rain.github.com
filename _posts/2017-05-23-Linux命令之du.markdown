@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之du
 date: 2017-05-23 16:37:44
 updated: 2017-05-23 16:55:54

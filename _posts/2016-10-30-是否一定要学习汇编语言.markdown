@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 是否一定要学习汇编语言
 date: 2016-10-30 13:37:08
 updated: 2017-02-21 16:09:38

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 构建基本脚本
 date: 2017-01-05 16:39:43
 updated: 2017-01-05 17:01:44

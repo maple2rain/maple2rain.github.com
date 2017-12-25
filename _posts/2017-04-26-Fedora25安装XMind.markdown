@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Fedora 25 安装XMind
 date: 2017-04-26 16:17:32
 updated: 2017-05-07 16:02:17

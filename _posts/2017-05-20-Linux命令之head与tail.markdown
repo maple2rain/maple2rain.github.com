@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Linux命令之head与tail
 date: 2017-05-20 22:25:41
 updated: 2017-05-22 19:19:12

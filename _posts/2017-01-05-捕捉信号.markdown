@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 捕捉信号
 date: 2017-01-05 16:59:33
 updated: 2017-01-05 17:03:22

@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: makefile与automake
 date: 2017-01-05 16:28:00
 updated: 2017-03-23 19:18:28

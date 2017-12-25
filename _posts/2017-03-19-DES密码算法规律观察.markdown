@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: DES密码算法规律观察
 date: 2017-03-19 20:12:44
 updated: 2017-03-19 20:44:09

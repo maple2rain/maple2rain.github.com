@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 我的《马克思》课
 date: 2016-11-03 21:14:22
 updated: 2017-02-21 16:04:57

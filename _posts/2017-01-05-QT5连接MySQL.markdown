@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: QT5连接MySQL
 date: 2017-01-05 10:16:55
 updated: 2017-01-05 16:01:17

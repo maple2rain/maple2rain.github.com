@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: 标准模式与非标准模式
 date: 2017-01-05 16:25:33
 updated: 2017-01-05 16:29:33

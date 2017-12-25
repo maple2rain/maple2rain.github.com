@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Guide to Unix & Linux学习笔记—— 3.Unix连接
 date: 2017-04-16 20:51:55
 updated: 2017-05-19 16:17:46

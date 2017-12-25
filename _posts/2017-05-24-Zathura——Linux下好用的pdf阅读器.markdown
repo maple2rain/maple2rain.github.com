@@ -1,3 +1,6 @@
+---
+layout: post
+author: LPF
 title: Zathura——Linux下好用的pdf阅读器
 date: 2017-05-24 22:54:49
 updated: 2017-05-25 22:07:10
