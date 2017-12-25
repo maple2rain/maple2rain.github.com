@@ -1,3 +1,5 @@
+---
+layout: post
 title: JNI多线程问题
 date: 2017-11-15 16:04:39
 updated: 2017-11-15 16:54:05
@@ -5,7 +7,19 @@ categories:
 - Study
 - BugCollections
 - Java
+author: LPF
 ---
+
+* content
+{:toc}
+
+在调用JNI的方法时，部分会需要用到`JNIEnv`，因此想着保留该实例以让其他需要用到的地方直接用，而不用每次都被迫使用`native`方法。但是在多线程情况下，由于JVM的每个线程绑定每个独立的`JNIEnv`，所以在跨线程使用时会失败。
+
+
+
+
+
+
 ## 问题
 
 在调用JNI的方法时，部分会需要用到`JNIEnv`，因此想着保留该实例以让其他需要用到的地方直接用，而不用每次都被迫使用`native`方法。但是在多线程情况下，由于JVM的每个线程绑定每个独立的`JNIEnv`，所以在跨线程使用时会失败。
