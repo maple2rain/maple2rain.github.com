@@ -1,0 +1,121 @@
+title: 环境变量
+date: 2017-01-05 16:40:02
+updated: 2017-01-05 17:01:49
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Base
+---
+## 1 什么是环境变量
+
+**bash shell**使用一个称作**环境变量(environment variables)**的特性来存储有关**shell**会话和工作环境的信息。
+这些数据可以用来识别用户账户、系统、**shell**的特性以及任何其他需要存储的数据。
+
+使用**echo**命令可以输出变量的值，变量需用**$**进行引用，如
+
+```bash
+$ echo $variable
+value
+```
+
+### 1.1 变量种类
+
+- 全局环境变量
+    
+    全局变量不仅对**shell**会话可见，对所有**shell**创建的子进程也可见。
+    使用**printenv**命令可以打印出所有的全局变量。
+
+- 局部环境变量
+
+    局部变量值对创建他们的**shell**可见。
+    使用**set**命令可以打印出为某个特定进程所设置的所有环境变量，包括全局变量。从而在**set**命令的输出中有的而在**printenv**命令输出没有的则是局部变量。
+
+## 2 设置环境变量
+
+### 2.1 设置局部环境变量
+
+一旦启动了**bash shell**或执行一个**shell**脚本，则能创建在这个**shell**进程内可见的局部变量了。
+可以通过等号来给环境变量赋值，值可以是数值或字符串：
+
+```bash
+$ test=testing
+$ echo $test
+testing
+```
+
+如果要给变量赋一个含有空格的字符串值，则必须用单引号来界定字符串的开始和末尾：
+
+```bash
+$ test=testing a string
+-bash: a: command not found
+$ test='testing a string'
+$ echo $test
+testing a string
+```
+
+没有单引号的话，**bash shell**会以为下个字符串是另一个要执行的命令。
+
+### 2.2 设置全局环境变量
+
+创建全局环境变量的方法是，先创建一个局部环境变量，然后再把它导出到全局环境中。
+这个过程通过**export**命令来完成：
+
+```bash
+$ echo $test
+testing a string
+$ export test
+```
+
+## 3 删除环境变量
+
+使用**unset**命令来删除环境变量。
+
+```bash
+$ echo $test
+testing a string
+$ unset test
+$ echo test
+
+$
+```
+
+- 注意
+
+    在子进程中删除了一个全局环境变量，删除操作只对子进程有效。
+    该全局环境变量在父进程中依然有效。
+
+## 4 设置PATH环境变量
+
+**PATH**环境变量定义了命令行输入命令的搜索路径。
+如果找不到命令，则会产生一个错误。
+
+一个严重的问题是，应用会把可执行程序放到不在**PATH**环境变量中的目录，解决方法是保证**PATH**环境变量包含了所有存放应用的目录。
+
+可以添加新的搜索目录到现有的**PATH**环境变量而无需从头定义。
+**PATH**中的目录之间使用冒号分隔的，所以可以引用原来的**PATH**值并给字符串添加新的值。
+
+```bash
+$ PATH=$PATH:dirctory   //添加指定目录directory
+$ PATH=$PATH:.          //添加当前目录
+```
+
+## 5 使用命令别名
+
+**命令别名**允许通用命令(和他们的参数一起)创建一个别名，从而通过最少的键入调用想要的命令。
+
+查看已用的列名列表，可以使用**alias -p**或直接用**alias**命令。
+
+### 5.1 创建自己的命令别名
+
+```bash
+alias newName='command [option]'
+```
+
+不过，别名只在定义他们的**shell**进程有效。
+但**bash shell**在启动交互式**shell**时总会读取**/etc/bash.bashrc**启动文件，因此可以在此创建命令别名以使其通用。

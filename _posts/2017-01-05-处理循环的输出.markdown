@@ -1,0 +1,33 @@
+title: 处理循环的输出
+date: 2017-01-05 16:50:00
+updated: 2017-01-05 17:02:22
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Structure  Stament
+---
+## 1 重定向循环输出
+
+可以将循环的结果输出到文件：
+
+```sh
+done > output.txt
+```
+
+即在循环命令的**done**语句添加重定向符及输出文件即可。
+
+## 2 管道接管
+
+同样，也可以将循环的结果管接给另一个命令：
+
+```sh
+done > sort
+```
+
+此时循环的输出将传递给**sort**命令，他会改变循环的输出结果顺序并输出。

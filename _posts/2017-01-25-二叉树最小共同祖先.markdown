@@ -1,0 +1,44 @@
+title: 二叉树最小共同祖先
+date: 2017-01-25 22:53:34
+updated: 2017-01-25 23:22:24
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给定两个节点，求他们的最小共同最先。
+
+## 条件
+
+1. 二叉树不是搜索树
+2. 在给定的两个节点A和B中，如果节点A在节点B所在的子树中，那么最小公共祖先为B。 
+
+## 思路
+
+在本题中，
+
+- 先判断当前节点是否为两个给定节点A和B之一，如果是，直接返回当前节点，即为最小公共祖先
+- 否则，递归对其左右节点调用函数，然后根据左右子树的结果，返回恰当的值
+- 如果左右子树返回的最小公共祖先均不为空，说明p和q分别在当前节点的两边，则返回当前节点
+- 如果左右子树返回均为空的结果，则函数最后也返回空
+
+## 算法
+
+```java
+TreeNode LCA(TreeNode root, TreeNode p, TreeNode q){
+    if(root == null || p == null || q == null)
+        return null;
+        
+    if(root == p || root == q)
+        return root;
+    
+    TreeNode left = LCA(root.left, p, q);
+    TreeNode right = LCA(root.right, p, q);
+    
+    if(left && right)
+        return root;
+    
+    return left == null ? right : left;//not both node found, return one of them
+
+}
+```

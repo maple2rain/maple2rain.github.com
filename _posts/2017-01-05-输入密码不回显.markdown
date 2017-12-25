@@ -1,0 +1,52 @@
+title: 输入密码不回显
+date: 2017-01-05 16:24:05
+updated: 2017-01-05 16:30:23
+tags:
+- Linux Terminal
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Terminal
+---
+
+
+## 1 示例程序
+
+- 程序
+
+    ```c
+    #include <termios.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    #define PASSWD_LEN 9
+    int main(void)
+    {
+
+        struct termios initSet, newSet;
+        char passwd[PASSWD_LEN + 1];
+
+        tcgetattr(fileno(stdin), &initSet);//获得标准输入属性
+        newSet = initSet;
+        newSet.c_lflag &= ~ECHO;//取消回显
+
+        printf("Enter password:");
+
+        /*清除缓冲*/
+        if(tcsetattr(fileno(stdin), TCSAFLUSH, &newSet) != 0)
+            fprintf(stderr, "Could not set attributes!\n");
+        else
+        {
+            fgets(passwd, PASSWD_LEN, stdin);
+            tcsetattr(fileno(stdin), TCSANOW, &initSet);//恢复初始值
+            fprintf(stdout, "\nYou enter %s\n", passwd);
+        }
+        exit(0);
+    }
+    ```
+
+- 执行结果
+    

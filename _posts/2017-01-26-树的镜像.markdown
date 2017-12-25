@@ -1,0 +1,54 @@
+title: 树的镜像
+date: 2017-01-26 00:27:46
+updated: 2017-01-26 00:40:55
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给出一棵二叉树，判断其是否为自身的镜像。
+
+## 举例
+
+镜像树即为以根节点为中心，所有节点值对称相等。
+
+## 思路
+只要能保证根节点下的左子树的每一层是右子树的镜像，即可说明此树为镜像树。
+利用两个队列分别记录左右子树每一层的节点，在广度优先遍历左右子树时，为了方便比较左右两边的节点，将空节点也加入队列。针对两边镜像节点的情况，必须处理如下不同情况：
+
+1. 如果两边节点均为空，则忽略这种情况
+2. 如果一边为空而另一边不为空，则为false
+3. 如果均不为空，但值不相同，则为false
+4. 把左边的节点的子节点按照从左到右顺序加入左边的队列尾部，而把右边的节点的子节点按照从右到左的顺序加入右边的队列尾部
+5. 在遍历后，需判断两个队列是否为空，均为空才为true
+
+```java
+boolean isSymmetric(TreeNode root){
+    if(root == null) return true;
+    
+    Queue<TreeNode> left = new LinkedList<TreeNode>();
+    Queue<TreeNode> right = new LinkedList<TreeNode>();
+    
+    left.add(root.left);
+    right.add(root.right);
+    
+    while(!left.empty() && !right.empty()){
+        TreeNode l = left.poll();
+        TreeNode r = right.poll();
+        
+        if(!l && !r)    continue;   //both null
+        if(!l || !r)    return false;   //one of them is null
+        
+        if(l.val != r.val)  return false;
+        
+        //add new node into queue
+        left.add(l.left); left.add(l.right);
+        right.add(r.right); right.add(r.left);
+    }
+    
+    if(left.empty() && right.empty())
+        return true;
+    else
+        return false;
+}
+```

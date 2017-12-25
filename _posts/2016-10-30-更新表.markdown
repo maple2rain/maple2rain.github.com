@@ -1,0 +1,79 @@
+title: 更新表
+date: 2016-10-30 09:32:26
+updated: 2017-02-21 15:16:16
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+## 1 更新表结构
+
+为更新表定义，可使用**ALTER TABLE**语句。
+但是，理想状态下，当表中存储数据后，该表就不应该再被更新。
+在表的设计过程中需要花费大量时间来考虑，以便后期不对该表进行大的改动。
+
+### 1.1 更新操作
+
+- 在**ALTER TABLE**之后给出要更改的已存在的表名
+- 接下来是所做更改的列表
+
+### 1.2 添加新的列
+
+```SQL
+ALTER TABLE emailNotes
+ADD phone char(20);     
+```
+
+上述例子新添加了一个名为**phone**的列，该列的数据类型为**char**型，长度为20。
+
+### 1.3 删除旧的列
+
+```SQL
+ALTER TABLE emailNotes
+DROP COLUMN phone;
+```
+
+上述例子将名为**phone**的列删除了。
+
+## 2 定义外键
+
+**ALTER TABLE**常见用途为定义外键。
+
+### 2.1 例子
+
+```SQL
+ALTER TABLE emailNotes
+ADD CONSTRAINT text     #外键约束名为text
+FOREIGN KEY (noteText) REFERENCES productNotes (noteText);
+```
+
+上述例子将**emailNotes**的*noteText*列设为外键，其与productNotes的*noteText*列相关联，并且约束名为**text**。
+外键约束名可以用来表示哪一列是外键，并且在删除外键时，可通过约束名来进行删除。
+查看外键看使用语句`SHOW CREATE TABLE 表名;`
+
+## 3 更改表步骤
+
+- 用新的列布局创建一个新表
+- 使用**INSERT SELECT**语句从旧表复制数据到新表。如果有必要，可使用转换函数和计算字段
+- 检验包含所需数据的新表
+- 重命名旧表 
+- 用旧表原来的名字重命名新表 
+- 根据需要，重新创建触发器、存储过程、索引和外键
+
+## 4 删除表
+
+删除表（删除整个表而不是其内容）非常简单，使用**DROP TABLE**语句即可，如
+
+```SQL
+DROP TABLE emailNotes; #删除表emailNotes
+```
+
+## 5 重命名表
+
+改变表名有两个方式：
+
+```SQL
+ALTER TABLE 表名 RENAME TO 新表名 #第一种
+RENAME TABLE 表名 TO 新表名       #第二种
+```

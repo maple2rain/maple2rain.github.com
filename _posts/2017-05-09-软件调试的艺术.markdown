@@ -1,0 +1,836 @@
+title: 软件调试的艺术
+date: 2017-05-09 20:13:22
+updated: 2017-05-30 21:22:30
+tags:
+- Linux
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- Tools
+---
+> GDB是UNIX程序员最常用的调试工具，这是由Richard Stallman(开源软件运动的领路人)开发的GNU项目调试器，该工具在Linux开发中扮演了关键的角色。
+
+大多数Linux系统都预先安装了GDB。如果没有预先安装该工具，则必须下载GCC程序包(包含GDB)，如，在Fedora上，命令为：
+
+```sh
+$ sudo dnf install gcc
+```
+
+# 预备知识
+
+## 调试的原则
+
+虽然调试是一门艺术而非科学，但仍然有一些明确的原则来指导调试的实践。
+
+- 调试的本质：确认原则
+    修正充满错误的程序，就是逐个确认的过程，你自认为正确的许多事情所对应的代码确实是正确的。当你发现其中某个假设不成立时，就表示已经找到了关于程序错误所在位置的线索。
+- 调试工具对于确认原则的价值所在
+    传统的调试技术只是向程序中添加`跟踪代码`以在程序执行时输出变量的值，但这种方法要求有策略地持续跟踪代码，重新编译程序，运行程序并分析跟踪代码的输出，在修正程序错误之后删除跟踪代码，并且针对发现的每个新的程序错误重复上述这些步骤。
+    这些过程非常耗时，并且容易令人疲劳。最为重要的是，这些操作将你的注意力从实际任务转移开，并且降低了集中经历查找程序错误所需的推理过程的能力。
+    如果使用调试工具，则可以直接查看变量，并且其会指出程序错误的大概位置，还可设置`监视点(watchpoint)`，通过监视点可以了解程序在运行期间某个变量的值达到可疑值或范围的具体位置。
+- 其他调试原则
+    
+    - 从简单工作开始调试
+        在调试过程的开始阶段，应该从容易、简单的情况开始运行程序。这样做也许无法揭示所有的程序错误，但是很有可能发现其中的部分错误。如代码由大型循环组成，可能在第一或第二次迭代期间引发程序错误。
+    - 使用自顶向下的方法
+        例如，假设程序使用函数`foo`。在调试工具但不调试代码并且遇到`foo`的调用时，调试器为你提供选择执行过程中下一次暂停位置的机会——是在调用函数的第一行还是跟在函数调用后的语句？在许多情况下，后者是较好的初始选择：执行调用，然后检查依赖于调用结果的变量的值，从而了解该函数是否正确运行。如果该函数正确运行，就可以避免但不调试函数中代码这样既浪费时间又不必要的工作。
+    - 使用调试工具确定段错误的位置
+        当发生段错误时，执行的第一步操作应该是在调试器中运行程序并重新产生段错误。调试器将指出发生这种错误的代码行，然后，可以通过调用调试器的`反向跟踪`功能获得其他有用信息，该功能显示导致调用引发错误的函数的函数调用序列。
+    - 通过发出中断确定无限循环的位置
+        如果怀疑程序中存在无限循环，则进入调试器并再次运行程序，让该程序执行足够长的时间以进入循环。然后，调用调试器的中断命令挂起该程序，并且执行反向跟踪，了解已到达循环主体的哪个位置以及程序是如何到达该位置的。
+    - 使用二分搜索
+        在调试过程中可以应用二分搜索的原理。假设知道在1000次循环中，某个变量的值在某个时刻出现问题，那么可以使用监视点，或者采用二分搜索的方法查询该值，如先检查第500次迭代期间的值；如果此时该值正确，则查看第750次迭代期间 值，以此类推。
+        有时，出现在程序中的某个源文件无法编译的问题，而由语法错误产生的编译器消息中，提示的代码行有时与实际错误位置相去甚远，因此可能很难确定该位置。此时，可以采用二分方法，先删除或注释一半代码，看是否编译成功，如果编译失败，则错误在当前未被删除或注释的一半代码中，否则就是另一半代码；继续执行相同的操作直到确定问题的所在。
+
+----------
+
+
+## GUI与文本调试工具
+
+GUI提供的界面往往更加形象，使用起来也比较方便，也比较易于查看调试代码。但文本界面还是由若干优点的：
+
+- GDB的启动速度较快，如只需要快速检查代码中的某项内容时，速度就比较重要
+- 远程调试时，有时不能使用GUI，即使可以，GUI的屏幕刷新操作也会非常缓慢
+- 同时调试多个程序时，文本调试占据的可视空间少反而是个优点
+- 调试GUI程序可能会于GUI调试器产生冲突，如按键等冲突。
+- 文本调试工具通常会提供便捷的命令和组合键等来减少输入工作；还可使用缩写和宏等
+
+- 折中方法
+
+    使用`TUI`模式。在这一模式中，GDB将终端屏幕划分为源文本和控制台多个子窗口，便于调试。
+    启动方式为在命令行指定`-tui`选项，或者使用快捷键`Ctrl-X-A`在不同模式之间来回切换，界面如下所示：
+    ![GDB的TUI模式](../post_img/5911d3bfab644166f80099f2)
+
+----------
+
+
+# GDB操作
+
+## 主要调试器操作
+
+当要调试程序时，在编译时需要指定`-g`选项，如调试`hello.c`，输出为`hello.o`，则编译命令如下：
+
+```sh
+$ gcc -g hello.c -o hello.o
+```
+
+进入调试，则使用`gdb`命令，如下:
+
+```sh
+$ gdb hello.o
+```
+
+- 单步调试源代码
+    进入调试后，使用`run`命令运行程序。
+    - 断点
+    调试工具支持在指定断点处暂停程序的执行。通过`break`命令加上行号或函数名可以设置断点，如下分别用行号和函数名设置断点：
+    ![设置断点](../post_img/5911d3bfab644166f80099f4)
+    当设置断点为函数时，默认是设置在函数的起始语句。此时执行`run`命令时，会发现程序运行暂停在第4行。
+    ![运行至断点处](../post_img/5911d3bfab644166f80099f0)
+    - 单步调试
+        执行`next`命令会让GDB执行下一行，然后暂停。
+        执行`step`命令的作用与此类似，只是在函数调用时`step`命令会进入函数并暂停在起始语句处。
+    - 恢复操作
+    执行`continue`命令通知调试器恢复执行并继续运行，直到遇到断点为止。
+    使用`finish`命令将指示GDB恢复执行直到当前栈帧完成之后为止。
+    使用`until`命令会执行循环的其余部分，并在循环后面的第一行代码处暂停，或者直接指定在某处暂停，方法同创建断点，只是将`break`改为`until`。
+    - 临时断点
+    临时断点命令`tbreak`与`break`相似，但是这一命令设置的断点有效性只有一次性。
+    
+- 检查变量
+    最基本的变量显示类型是仅仅输出其当前值，使用`print`命令，如下：
+    ![检查变量](../post_img/5911d3bfab644166f80099f3)
+- 设置监视点
+    `监视点`结合了断点和变量检查的概念。最基本形式的监视点通知调试器，每当指定变量的值发生变化时都暂定程序的执行并显示其值。
+    ![设置监视点](../post_img/5911d3bfab644166f80099ef)
+    更好的方法是，可以基于条件表达式来设置监视点，如查看i的变化情况，查看其是否被赋值予2，则可以设置条件表达式`i > 2`来观看其值是否改变。此时监视点为表达式，因此其值为bool类型，`true`为`1`，`false`为`0`。如下命令所示：
+
+    ```sh
+    (gdb) watch (i == 2)
+    ```
+    ![设置表达式监视点](../post_img/5911d3bfab644166f80099f1)
+- 上下移动调用栈
+    在函数调用期间，与调用关联的运行时信息存储在称为`栈帧(stack frame)`的内存区域中。帧中包含函数的局部变量的值、形参，以及调用该函数的位置的记录。每次发生函数调用时，都会创建一个新帧，并将其推到一个系统维护的栈上；栈最上方的帧表示当前正在执行的函数，当函数退出时，这个帧被弹出栈，并且被释放。
+    在GDB中可以使用`frame`命令查看栈帧。当执行**frame**命令时，当前正在执行的函数的帧被编号为0，其父帧(该函数的调用者的栈帧)被编号为1，父帧的父帧被编号为2，以此类推。
+    使用`up`命令将你带到调用栈中的下一个父帧(如，从帧0到帧1)，`down`命令则相反。这些操作非常有用，因为可以根据以前的一部分栈帧中的局部变量的值，可能发现一些关于引起程序错误的代码的线索。
+    遍历调用栈不会修改执行路径，但可以查看帧的祖先帧，并查看其局部变量的数据。
+
+----------
+
+
+## 联机帮助
+
+在GDB中，可以通过`help`命令访问帮助文档。例如：
+
+```sh
+(gdb) help breakpoints
+```
+将显示关于断点的文档。
+不带参数的`help`命令提供了一个用来作为`help`参数的命令类别的菜单。
+
+----------
+
+
+# 停下来环顾程序
+
+## 暂停机制
+
+有3种方式可以通知GDB暂停程序的执行。
+
+- `断点`：通知GDB在程序中的特定位置暂停执行
+- `监视点`：通知GDB在特定内存位置或者涉及一个或多个位置的表达式的值发生变化时暂停执行
+- `捕获点`：通知GDB当特定事件发生时暂停执行
+
+----------
+
+
+## 跟踪断点
+程序员创建的每个断点(包括断点、监视点和捕获点)都被标识为1开始的唯一整数标识符。这个标识符用来执行该断点上的各种操作。调试器还包括一种列出所有断点及其属性的方式。
+
+----------
+
+
+### 断点列表
+
+当创建断点时，GDB会告知你分配给该断点的编号。例如，本例中设置的断点：
+
+```sh
+(gdb) b	4
+Breakpoint 1 at 0x4004fa: file hello.c, line 4.
+```
+被分配的编号是2。如果忘记了分配给哪个断点的编号是什么，可以使用`info breakpoints`命令来查看：
+
+```sh
+(gdb) info breakpoints 
+Num     Type           Disp Enb Address            What
+1	breakpoint     keep y   0x00000000004004fa in foo at hello.c:4
+        breakpoint already hit 1 time
+2	breakpoint     keep y   0x000000000040050f in main at hello.c:9
+        breakpoint already hit 1 time
+3	hw watchpoint  keep y                      i
+```
+
+可以通过`delete`命令对断点(包括断点、监视点和捕获点)进行删除，如删除断点1和监视点3:
+
+```sh
+delete 1 3
+```
+
+----------
+
+
+## 设置断点
+
+在前面已经介绍了如何设置断点，在此总结设置断点的常见方法：
+
+- break function
+    在函数*funcion*的入口(第一行可执行代码)处设置断点。
+- break line
+    在当前活动源文件的*line*处设置断点。
+- break file:line
+    在源文件*file*的*line*处设置断点。
+- break file:function
+    在源文件*file*的函数*function*处设置断点。
+
+其他`break`参数：
+
+- break +offset 或 -offset
+    在当前选中的栈帧中正在执行的源代码前面或后面设置断点偏移行数。
+- break *address
+    在虚拟内存地址处设置断点，这对于程序没有调试信息的部分(比如当源代码不可用，或者对于共享库)是必需的。
+
+----------
+
+
+## 删除和禁用断点
+
+如果确认不再需要当前断点，那么可以删除该断点。也有可能是断点会在调试会话之后会有用，即只是想暂时挂起该断点，这称为**禁用断点**。如果以后再次需要，可以重新启用断点。
+
+----------
+
+
+### 删除断点
+
+GDB中有两个用来删除断点的命令：
+
+- `delete`命令用来基于标识符删除断点
+    删除断点使用数值标识符，比如`delete 2`删除第二个断点；也可以是数字列表，比如`delete 2 4`删除第二个和第四个断点。
+- `clear`命令使用与创建断点相同的语法来删除断点，如`clear function`、`clear file:function`、`clear line`、`clear file:line`
+
+----------
+
+
+### 禁用断点
+
+为什么要禁用断点呢？在调试会话期间，会遇到大量断点。对于经常重复的循环结构或函数，这种情况使得调试极不方便。如果要保留断点以便以后使用，暂时又不希望GDB停止执行，可以禁用他们，在以后需要时再启用。
+
+使用`disable breakpoint-list`命令禁用断点，使用`enable breakpoint-list`命令启用断点，其中*breakpoint-list*是使用空格分隔的列表，其中有一个或多个断点标识符。例如：
+
+```sh
+(gdb) disable 3
+```
+将禁用第三个断点。类似地，
+
+```sh
+(gdb) disable 1 5
+```
+将禁用第一和第五个断点。
+不带任何参数地执行`diable`命令将禁用所有现有断点。类似地，不带参数地执行`enable`命令会启用所有现有断点。
+还有一个`enable once`命令，在断点下次引起GDB暂停执行后被禁用，语法为：
+
+```sh
+(gdb) enable once breakpoint-list
+```
+
+----------
+
+
+## 进一步介绍浏览断点属性
+
+当使用`info breakpoints`命令查看断点清单时，可以查看到他们的属性，其输出类似如下：
+
+```sh
+(gdb) info breakpoints 
+Num Type    Disp Enb Address            What
+1	breakpoint     keep y   0x00000000004004fa in foo at hello.c:4
+        breakpoint already hit 1 time
+2	breakpoint     keep y   0x000000000040050f in main at hello.c:9
+        breakpoint already hit 1 time
+3	hw watchpoint  keep y                      i
+```
+
+- Num(标识符)：断点的唯一标识符
+- Type(断点类型)：指出该断点是断点(*breakpoint*)、监视点(*he watchpoint*)还是捕获点(*catch*)
+- Disp(部署)：每个断点都有一个部署，指示断点下次引起GDB暂停程序的执行后该断点上会发生什么事情，可能的部署有以下3种：
+    - keep(保持)：下次打到断点后不改变断点，默认部署
+    - del(删除)：下次到达断点后删除该断点，使用`tbreak`创建的断点为这般断点
+    - dis(禁用)：下次到达断点时会禁用该断点，使用`enable once`设置的断点是这般断点
+- End(启用状态)：该字段说明丹慊是启用(y)还是禁用(n)
+- Address(地址)：内存中设置断点的地址
+- What(位置)：断点所在位置的函数、文件名、行号
+
+此外，还可以看到断点被执行了多少次，这对于查看循环迭代了多少次十分有用。
+
+----------
+
+
+## 条件断点
+
+设置条件断点的语法为：
+
+```sh
+(gdb) break break-args if (condition)
+```
+其中*break-args*是可以传递给`break`以指定断点位置的任何参数，*condition*是布尔表达式，圆括号是可选的，但使用圆括号则很有C程序的感觉。*condition*可以由下列内容：
+
+- GDB[方便变量](#convID)
+- 程序中的任何在作用域内的变量
+- 任何种类的字符串、数字或字符常量
+- 预处理宏
+- 条件、函数调用、类型强制转换和所用语言定义的运算符
+
+例如，为了根据输入参数的个数来决定是否在*main*处中断：
+
+```sh
+(gdb) break main if argc > 1
+```
+
+在循环中暂停，如下列代码：
+
+```c
+for ( i = 0; i <= 75000; ++i) {
+    retval = process(i);
+    doSomething(retval);
+}
+```
+假设你指定当*i*为*70000*时会出错，要在循环顶部中断，但是不打算用*next*迭代*69999*次，那么就可以使用条件中断。可以在循环顶部设置一个断点，但是只有当*i*等于*70000*才中断，如下：
+
+```sh
+(gdb) break if (i == 70000)
+```
+
+可以对正常断点设置条件以将他们转变为条件断点。例如，如果设置来断点3作为无条件断点，但是现在希望添加条件**i == 3**，只要键入：
+
+```sh
+(gdb) cond 3 i == 3
+```
+如果以后要删除条件，但是要保持该断点，只要键入：
+
+```sh
+(gdb) cond 3
+```
+
+----------
+
+
+## 断点命令列表
+
+当GDB遇到断点时，几乎总是要查看某个变量，如果反复遇到同一个断点时，将反复查看相同的变量。如果让GDB在每次到达某个断点时自动执行一组命令，从而自动完成这一过程，不是很好吗？
+事实上，可以使用**断点命令列表**，以下将使用`printf`命令来说明列表的使用，该命令与C中的函数`printf`基本相同，只是括号是可选的。
+使用`commands`命令设置命令列表，语法如下：
+
+```sh
+(gbd) commands breakpoint-number
+...
+commands
+...
+end
+```
+其中*breakpoint-number*是要将命令添加到断点的标识符，*commands*时用新行分隔的任何有效GDB命令列表。逐条输入命令，然后键入*end*表示输入命令完毕。从那以后，每当GDB在这个断点处中断时，他都会执行你输入的任何命令。
+
+例如以下是一个求**fibonacci**数字的例程：
+
+```c
+#include <stdio.h>
+int fibonacci(int n)
+{
+    if (n == 0 || n == 1) {
+        return 1;
+    }else{
+        return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+}
+
+int main()
+{
+    printf("fibonacci(3) is %d\n", fibonacci(3));
+    return 0;
+}
+```
+
+当打算查看传递给*fibonacci*函数的值及次序时，这个时候在源文件添加*printf*语句然后再重新编译无疑是非常蠢的。而最好的方法就是，在函数开头设置断点，然后在断点上设置一个输出变量n的命令：
+
+```sh
+(gdb) b	fibonacci
+Breakpoint 1 at 0x400502: file fibonacci.c, line 4.
+(gdb) commands 1
+Type commands for breakpoint(s) 1, one per line.
+End with a line saying just "end".
+>printf	"fibonacci was passed %d.\n", n
+>end
+```
+
+接下来运行看输出如何：
+
+```sh
+(gdb) run会
+Starting program: /home/maple/tmp/world/fibonacci.o
+
+Breakpoint 1, fibonacci (n=3) at fibonacci.c:4
+fibonacci was passed 3.
+(gdb) continue 
+Continuing.
+
+Breakpoint 1, fibonacci (n=2) at fibonacci.c:4
+fibonacci was passed 2.
+(gdb) continue 
+Continuing.
+
+Breakpoint 1, fibonacci (n=1) at fibonacci.c:4
+fibonacci was passed 1.
+(gdb) continue 
+Continuing.
+
+Breakpoint 1, fibonacci (n=0) at fibonacci.c:4
+fibonacci was passed 0.
+(gdb) continue 
+Continuing.
+
+Breakpoint 1, fibonacci (n=1) at fibonacci.c:4
+fibonacci was passed 1.
+(gdb) continue 
+Continuing.
+fibonacci(3) is 3
+[Inferior 1 (process 6397) exited normally]
+```
+这非常接近预期输出，只不过太冗长来，毕竟我们已经知道了断点在何处，所幸，可以使用`silent`命令使GDB更安静地触发断点，减少冗余输出：
+
+```sh
+(gdb) b	fibonacci
+Breakpoint 1 at 0x400502: file fibonacci.c, line 4.
+(gdb) commands 1
+Type commands for breakpoint(s) 1, one per line.
+End with a line saying just "end".
+>silent
+>printf	"fibonacci was passed %d.\n", n
+>end
+```
+
+为了在命令列表中的命令完成后继续自动执行程序，可以添加`continue`命令：
+
+```sh
+(gdb) b	fibonacci
+Breakpoint 1 at 0x400502: file fibonacci.c, line 4.
+(gdb) commands 1
+Type commands for breakpoint(s) 1, one per line.
+End with a line saying just "end".
+>silent
+>printf	"fibonacci was passed %d.\n", n
+>continue
+>end
+```
+
+----------
+
+
+### 创建宏
+
+有时，可能对其他程序的代码也做此类操作，因此可以使用GDB的`define`命令创建宏。
+例如，定义宏**print_and_go**
+
+```sh
+(gdb) def print_and_go
+Type commands for definition of "print_and_go".
+End with a line saying just "end".
+>printf	$arg0, $arg1
+>continue
+>end
+```
+
+要像上述代码那样使用这个宏，应键入：
+
+```sh
+(gdb) commands 1
+Type commands for breakpoint(s) 1, one per line.
+End with a line saying just "end".
+>silent
+>print_and_go "fibonacci was passed %d\n." n
+>end
+```
+注意，在**print_and_go**的参数之间没有逗号，该宏可以保存在*.gdbinit*中。
+
+在命令列表中，也可调用程序中已有的函数，使用`call`命令，一般形式为：
+
+```sh
+call function(argument...)
+```
+
+其中*function*是函数名，*argument...*是参数列表。
+
+----------
+
+# 检查和设置变量
+
+## 检查动态数组
+
+在GDB中，可以输出整个数组，如声明为：
+
+```c
+int x[25];
+```
+方法是通过键入：
+
+```sh
+(gdb) print x
+```
+但是，如果是动态创建的数组，会是什么样呢？比如：
+
+```c
+int *x;
+x = (int *)malloc(25 * sizeof(int));
+```
+如果在GDB中键入如上命令：
+
+```sh
+(gdb) print x
+```
+则会简单打引出数组地址，或者键入：
+
+```sh
+(gdb) print *x
+```
+则只会输出数组的第一个元素**x[0]**。
+为了实现动态数组的输出，可以创建一个*人工数组*(artificial array)来解决这个问题，如下：
+
+```sh
+(gdb) print *x@25
+```
+
+则可以输出数组所有元素。
+其一般形式为：
+
+```sh
+*pointer@number_of_elements
+```
+
+其中*pointer*是指针，*number_of_elements*是要查看的元素个数，可以小于等于或大于动态分配的数组长度，但大于时会看到其他无效数据，但做边界测试时可能有用。
+同样，GDB也允许在适当的时候进行类型强制转换，如：
+
+```sh
+(gdb) print (int [25]) *x
+```
+
+----------
+
+## 监视局部变量
+
+可以通过调用`info locals`命令得到当前栈帧中所有局部变量的值列表。
+
+----------
+
+## 直接检查内存
+
+在有些情况下，可能希望检查给定地址的内存，而不是通过变量的名称。在这里，可以使用`x`命令，后接指定地址或指针，可查看内存值。
+
+----------
+
+## print和display的高级选项
+
+`print`和`display`命令允许指定可选的格式，例如：
+
+```sh
+(gdb) p/x y
+```
+会以十六进制显示变量*y*，而不是十进制格式。其他常用格式为*c*(character)、*s*(string)、*f*(floatint-poing)。
+可以临时禁用某个显示项，例如：
+
+```sh
+(gdb) disable display 1
+```
+临时禁用显示列表中的条目1，如果不知道条目号，可以通过`info display`命令检查。要重新启用条目，可以使用`enable`，例如：
+
+```sh
+(gdb) enable display 1
+```
+要完全删除显示的条目，使用`undisplay`，例如：
+
+```sh
+(gdb) undisplay 1
+```
+
+----------
+
+## 设置变量
+
+在某些情况下，在单步调试程序的中间使用调试器设置变量的值是有用的。这样可以快速地回答假设某个程序错误的各种来源时产生的诸如**如果...将会怎么样**的问题。
+在GDB中，值的设置非常容易，比如有变量*x*，想更改其值为*12*，可以使用`set`命令，如下：
+
+```sh
+(gdb) set x = 12
+```
+
+也可以设置命令行参数*args*，如下：
+```sh
+(gdb) set args 1 2 3
+```
+然而直接使用`run`命令后接参数也可完成参数的设置，因此该方法并无明显优势，但是使用`set`命令将会在执行`run`命令时才会更改命令行参数，因此可以当成是调试时记录。
+为了参看当前函数参数，可以使用`info args`命令。
+
+----------
+
+## GDB自己的变量
+
+除了在程序中声明的变量外，GDB还为其他变量提供了一些机制。
+
+----------
+
+### 值历史
+
+GDB的`print`命令的输出值被标为*\$1*、*\$2*等，这些值统称为**值历史**。在将来执行`print`命令时使用这样的值会比较方便。
+
+例如，为了查看数组*x*的第40个元素*x[39]*的值，第一次使用标识符，第二次为了方便可以使用值历史：
+
+```sh
+(gdb) print x[39]
+$1 = 12
+(gdb) print *$1
+$2 = 12
+```
+注意，**\***不是必需的，在这里使用只是源于其是数组，如果不使用**\***，将输出地址值。
+如果直接使用*\$*，则将引用最近的值历史。
+
+----------
+
+### 方便变量 {#convID}
+
+有时，为了记录某个值(如指针)以期在不同时候方便查看其值，可以设置**方便变量**。例如，当想查看指针*p*时，可以设置方便变量*q*，如下：
+
+```sh
+(gdb) set $q = p
+```
+
+从设置后起，只要执行如下命令即可查看指针*p*的值，随着他指向不同的区域改变而改变：
+
+```sh
+(gdb) print *$q
+```
+同样，**\***不是必需的，只是因为他是**指针**。
+
+此外，方便变量会可以根据C语言的规则改变值。例如有以下代码：
+
+```c
+int w[4] = { 12, 55, 8, 29};
+
+main()
+{
+    w[2] = 88;
+}
+```
+在GDB可能做一些类似如下的事情。
+
+```sh
+(gdb) break main
+Breakpoint 1 at 0x4004aa: file w.c, line 5.
+(gdb) run
+Starting program: /tmp/w
+
+Breakpoint 1, main () at w.c:5
+(gdb) next
+(gdb) set $i = 0
+(gdb) print w[$i++]
+$1 = 12
+(gdb)
+$2 = 55
+(gdb)
+$3 = 88
+(gdb)
+$4 = 29
+```
+
+在上面例子中，设置来方便变量*i*，其值从*0*开始，并且每一次都输出**w[$i++]**的值，按照C语言规则，则每次输出**w[i]**的值然后*i*自增。此外，单纯地在GDB按下`ENTER`键而没有输入命令将会重复上一个命令，在此为`print w[$i++]`。
+
+----------
+
+> 说明
+几乎可以方便变量选择任何名称，不过有一些例外。例如，不能让方便变量名为**\$3**等，因为那与值历史冲突。
+另外，如果使用汇编语言，则不应使用寄存器名。
+
+----------
+
+# 总结
+
+## 语法
+
+```sh
+$ gdb [-options] (arguments)
+```
+
+## 选项
+
+- cd：设置工作目录
+- q：安静模式，不打印介绍信息和版本信息
+- d：添加文件查找路径
+- x：从指定文件中执行GDB指令
+- s：设置读取的符号表文件
+- tui：以图形TUI界面显示
+
+
+
+## 运行
+
+|命令|简写|说明|
+|---|
+|run|r|运行程序，当遇到断点后，程序会在断点处停止运行，等待用户输入下一步的命令|
+|run *args*|r *args*|指定运行时参数|
+|continue|c|继续执行，直到下一个断点处或运行结束|
+|next|n|单步跟踪程序，遇到函数调用时不进入函数体|
+||ni|类似于n，但针对的是汇编指令|
+|step|s|单步跟踪程序，如果有函数调用，则进入函数|
+||si|类似于s，但针对的是汇编指令|
+|until||在一个循环体内单步跟踪时，可以运行程序直到退出循环体|
+|until *line*||运行至*line*行|
+|finish||运行程序，直到当前函数完成返回，并打印函数返回时的堆栈地址和返回值及参数值等信息|
+|call *func(args)*||调用程序中的函数*func*，并传递参数*args*|
+|quit|q|退出gdb|
+
+## 设置断点
+
+|命令|简写|说明|
+|---|
+|break *line*|b *line*|在第line行设置断点|
+|break *func*|b *func*|在函数func开头处设置断点|
+|break *file:line*|b *file:line*|在文件*file*第*line*行设置断点|
+|break *file:func*|b *file:func*|在文件*file*的函数*func*处设置断点|
+|break *expr*|b *expr*|根据条件表达式设置断点|
+|delete *n*|d *n*|删除断点*n*|
+|disable *n*|dis *n*|禁用断点*n*|
+|enable *n*|en *n*|启用断点*n*|
+|clear||用法同break，清除断点|
+
+## 查看源代码
+
+|命令|简写|说明|
+|---|
+|list|l|列出程序的源代码，默认每次显示10行<br>不带参数，将接着上一次list命令，继续输出下面的内容|
+|list *line*|l *line*|将显示当前文件以*line*为中心的前后10行代码|
+|list *func*|l *func*|显示函数*func*的源代码|
+
+## 打印表达式
+
+|命令|简写|说明|
+|---|
+|print *expr*|p *expr*|打印表达式*expr*的内容，表达式可以时任何当前正在被测试程序的有效表达式。<br>比如当前正在调试C语言的程序，那么*expr*可以是任何C语言的有效表达式，包括数字、变量甚至是函数调用|
+|display *expr*|disp *expr*|在每一次单步指令之后，紧接着输出被设置的表达式及值|
+|watch *expr*||设置一个监视点，一旦被监视的*expr*的值改变，gdb将强行终止正在被调试的程序|
+|whatis *expr*||查询变量类型或函数|
+|info *expr*|i *expr*|输出*expr*的内容，*expr*的值见[此表](#infoID)|
+
+## 查询运行信息
+
+|命令|说明|
+|---|
+|where/bt|显示当前运行的堆栈列表|
+|bt backtrace|显示当前调用堆栈|
+|up|进入到下一个父帧(如从帧0到帧1)|
+|down|进入到上一个父帧|
+|set *args*|指定运行时的参数|
+|show *args*|查看设置好的参数|
+
+## 分割窗口
+
+|命令|说明|
+|---|
+|layout|用于分割窗口，可以一边查看代码，一边测试|
+|layout src|显示源代码窗口|
+|layout asm|显示反汇编窗口|
+|layout regs|显示CPU寄存器窗口|
+|layout split|显示源代码和反汇编窗口|
+|^L|刷新窗口|
+
+> 提示
+交互模式下直接回车的作用是重复上一指令，对于单步调试非常方便。
+
+## info 查询参数 {#infoID}
+
+|参数|说明|
+|---|
+|address|描述符号表的存储位置|
+|all-registers|列出所有寄存器和他们的值|
+|args|当前栈帧参数|
+|auto-load|输出当前自动加载文件的状态|
+|auxv|辅助向量|
+|bookmarks|用户可设置书签的状态|
+|breakpoints|所有特殊断点的状态 (如果没有其他参数，则是所有的断点)|
+|checkpoints|当前检查点的ID|
+|classes|所有面向对象C的类|
+|common|Print out the values contained in a Fortran COMMON block|
+|copying|Conditions for redistributing copies of GDB|
+|dcache|Print information on the dcache performance|
+|display|当程序暂停时将显示的表达式|
+|exceptions|List all Ada exception names|
+|extensions|All filename extensions associated with a source language|
+|files|被调试的目标和文件|
+|float|浮点单元的状态|
+|frame|所有被选中的栈帧|
+|frame-filter|List all registered Python frame-filters|
+|functions|所有的函数名|
+|guile|Prefix command for Guile info displays|
+|handle|当接收到各种信号时调试器会做的动作|
+|inferiors|IDs of specified inferiors (all inferiors if no argument)|
+|line|源文件行的内存地址|
+|locals|当前栈帧的局部变量|
+|macro|宏定义|
+|macros|Show the definitions of all macros at LINESPEC|
+|mem|内存区域属性|
+|os|显示操作系统数据参数名|
+|pretty-printer|GDB command to list all registered pretty-printers|
+|probes|Show available static probes|
+|proc|显示进程信息|
+|program|程序执行状态|
+|record|信息记录|
+|registers|整型寄存器和他们的内容|
+|scope|List the variables local to a scope|
+|selectors|All Objective-C selectors|
+|set|显示所有GDB设置|
+|sharedlibrary|已加载共享库状态|
+|signals|当调试器接收到各种信号后会做什么|
+|skip|显示已跳过的状态|
+|source|显示当前源文件的信息|
+|sources|显示程序相关的源文件的文件信息|
+|stack|栈帧信息|
+|static-tracepoint-markers|List target static tracepoints markers|
+|symbol|Describe what symbol is at location ADDR|
+|target|已被调试的目标和文件名|
+|tasks|Provide information about all known Ada tasks|
+|terminal|Print inferior's saved terminal status|
+|threads|显示当前已知线程|
+|tracepoints|Status of specifiedtracepoints (all tracepoints if no argument)|
+|tvariables|Status of trace state variables and their values|
+|type-printers|GDB command to list all registered type-printers|
+|types|所有类型的名称|
+|unwinder|GDB command to list unwinders|
+|variables|所有全局和静态变量|
+|vector|向量单元的状态|
+|vtbl|显示C++的虚函数表|
+|warranty|Various kinds of warranty you do not have|
+|watchpoints|特定的监视点(如果没有额外参数则是所有监视点)|
+|win|所有可展示窗口列表|
+|xmethod|GDB command to list registered xmethod matchers|
+
+Type **help info** followed by info subcommand name for full documentation.
+
+----------
+
+
+## 更强大的工具
+
+cgdb可以看作gdb的界面增强版，用来替代gdb的`gdb -tui`。cgdb主要功能是在调试时进行代码的同步显示，这无疑增加了调试的方便性，提高了调试效率。
+界面类似vi，符合unix/linux下开发人员习惯;如果熟悉gdb和vi，几乎可以立即使用cgdb。
+
+# Reference
+
+[1] Norman Matloff. 软件调试的艺术[M]. 张云, 译. 北京:人民优点出版社, 2009.11:1-195.
+[2] [gdb调试利器](http://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/gdb.html)
+[3] [gdb命令](http://man.linuxde.net/gdb)

@@ -1,0 +1,51 @@
+title: 产生括号
+date: 2017-02-09 15:49:57
+updated: 2017-02-09 15:58:26
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 打印出所有N对合理的括号组合
+
+## 举例
+
+当N = 3 时，输出：
+```
+((()))
+(()())
+(())()
+()(())
+()()()
+```
+
+## 思路
+
+直观地想到使用递归函数产生N对合理的括号。
+在递归调用过程中，需要使用三个变量分别记录当前位置、左括号剩余量和右括号剩余量。初始化时，当前位置为0,左括号和右括号数目均为N。在往组合里填充括号时，判断：
+1. 如果没有剩余的左括号和右括号可以使用，则把当前结果作为合理的括号组合输出
+2. 如果左括号还有剩余时，在当前位置插入左括号，递归调用函数填充下一个位置
+3. 如果右括号剩余量大于左括号，说明需要匹配做括号，以保证合理的组合，则在当前位置插入右括号，递归调用函数填充下一个位置
+
+```java
+void printPar(int l, int r, char[] str, int count) {
+    if(l < 0 || r < l) return;
+    if(l == 0 && r == 0) {
+        System.out.println(str);
+    }else{
+        if(l > 0){
+            str[count] = '(';
+            printPar(l - 1, r, str, count + 1);
+        }
+        if(r > l){
+            str[count] = ')';
+            printPar(l, r - 1, str, count + 1);
+        }
+    }
+}
+
+void printPar(int n) {
+    char[] str = new char[n * 2];
+    printPar(n, n, str, 0);
+}
+```

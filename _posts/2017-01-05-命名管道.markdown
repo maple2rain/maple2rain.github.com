@@ -1,0 +1,150 @@
+title: 命名管道
+date: 2017-01-05 16:56:19
+updated: 2017-01-05 17:02:56
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Special Symbol
+---
+## 1 命名管道FIFO
+
+命名管道是一种特殊类型的文件，他在文件系统中以文件名的形式存在，但他的行为却与没有名字的管道类似，后者或者说是通过文件描述符或文件流指针。
+
+## 2 创建命名管道
+
+### 2.1 在shell中创建FIFO
+
+在shell中，可以通过以下命令行格式创建FIFO：
+
+```sh
+# 可能不是所有类UNIX系统都支持该命令
+mknod filename p
+
+# 比较推荐使用的命令
+mkfifo filename
+
+# Linux同时支持以上命令
+```
+
+输入命令创建FIFO后，查看其信息，如下：
+![](../post_img/586e0a2eab6441236e004767)
+
+ 注意，输出结果中的第一个字符为**p**，表示这是一个管道。最后的**|**符号是由*ls*命令的*-F*选项添加的，也表示这是一个管道。
+
+### 2.2 在程序中创建FIFO
+
+在程序中，可以使用两个不同管道函数调用创建FIFO：
+
+```c
+#include <sys/types.h>
+#include <sys/stat.h>
+
+/**
+ * @brief       :创建以FIFO
+ * @parameter   :filename   :欲创建的FIFO文件名
+ *               mode       :文件访问类型"rwx"
+ */
+int mkfifo(const char *filename, mode_t mode);
+
+/**
+ * @brief       :创建以FIFO
+ * @parameter   :filename   :欲创建的FIFO文件名
+ *               mode       :文件访问类型"rwx"
+ *               0          :使该函数具有可移植性，需要强制转化为dev_t类型
+ */
+int mknod(const char *filename, mode_t | S_FIFO, (dev_t)0);
+```
+
+- 简单例子
+
+```c
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+    int res = mkfifo("tmpFifo", 0777);//指定FIFO名为tmpFifo，模式为0777
+    if (res != 0)//返回值不为0则创建失败
+        printf("FIFO created failed.\n");
+    exit(EXIT_SUCCESS);
+}
+```
+正常情况下，执行程序的输出结果与在命令行执行*mkfifo*命令一致。
+
+## 3 访问FIFO
+
+命名管道的一个非常有用的特点是，由于他们出现在文件系统中，所以他们可以像平常的文件名一样在命令中使用。
+
+1. 尝试读取FIFO文件(此命令会被挂起以等待数据出现在FIFO中)
+
+   ```sh
+   $ cat < tmpFifo
+   ```
+
+2. 向FIFO写数据(必须在另一个终端执行)
+
+   ```sh
+   $ echo "Hello World" > tmpFifo
+   ```
+两个终端执行结果如下所示
+![](../post_img/586e0a3eab6441209e00488f)
+-  当第二个命令执行时，第一个命令才能正常显示并退出或被异常退出
+- 倘若第二个命令先执行，则其也会阻塞住，直到有向它访问的程序或被异常退出
+
+## 4 使用open打开FIFO
+
+- 打开*FIFO*的一个主要限制是，程序不能以*O_RDWR*模式打开，这样做的后果没有明确定义
+- 但是这个限制是有意义的，因为使用管道只是为了单向传递数据
+- 如果需要在程序之间双向传递数据，那么应该使用一对FIFO或先关闭再以另一种方式打开FIFO(不常用)
+
+打开*FIFO*文件和打开普通文件的另一点区别是，对*open_flag*的*O_NONBLOCK*选项的用法。
+使用该选项不仅改变*open*调用的处理方式，还会改变这次调用的返回文件描述符的读写请求处理方式。
+
+- open调用
+
+    ```c
+    //open调用将被阻塞，除非有一个进程以写方式打开同一个FIFO，否则不会返回
+    open(const char *path, O_RDONLY);
+
+    //即使没有其他进程以写方式打开FIFO，这个调用也将成功并立刻返回，读取0字节
+    open(const char *path, O_RDONLY | O_NONBLOCK);
+
+    //open调用将被阻塞，直到有一个进程以读方式打开同一个FIFO
+    open(const char *path, O_WRONLY);
+
+    //调用总是立刻返回，但如果没有进程以读方式打开FIFO文件，就返回一个错误并且FIFO不会被打开
+    //如果有进程以读方式打开FIFO，就可以通过返回的文件描述符对这个FIFO文件进行写操作
+    open(const char *path, O_WRONLY | O_NONBLOCK);
+    ```
+
+- 当使用*open*调用打开*FIFO*时，需要记得用*close*将返回的文件描述符关闭。
+
+## 5 对FIFO进行读写操作
+
+可以使用*read*和*write*调用对*open*调用打开的*FIFO*文件描述符进行读写操作。
+
+- read操作
+    + 对一个空的、阻塞的*FIFO*的*read*调用将等待，直到有数据可以读时才继续执行
+        - 当管道文件都关闭时，则返回0
+    + 对一个空的、非阻塞的*FIFO*的*read*调用将立刻返回0字节
+
+- write操作
+    + 对一个阻塞*FIFO*的*write*调用将等待，知道数据可以被写入时才能继续执行
+        * 系统规定，如果写入的数据长度小于等于**PIPE_BUF**，那么或者全部写入，或者都不写入
+    + 对于非阻塞的*FIFO*，如果*FIFO*不能接收所有写入的数据，他将按下面的规则执行
+        * 如果请求写入的数据的长度小于等于**PIPE_BUF**字节，调用失败，数据不能写入
+        * 如果请求写入的数据的长度大于**PIPE_BUF**字节，则写入部分数据，返回实际写入的字节数，返回值也可能是0
+
+- 数据交错
+    单只使用一个*FIFO*并允许多个不同的程序向一个*FIFO*读进程发送请求时，如果他门同时尝试向*FIFO*写数据，那么又如何保证来自不同程序的数据块不相互交错呢？
+    如果能保证所有的请求是发往一个阻塞的*FIFO*，并且每个写请求的数据长度小于等于**PIPE_BUF**字节，系统就可以确保数据绝不会交错在一起。
+    通常将每次通过*FIFO*传递的数据长度限制为**PIPE_BUF**字节是一个好方法，除非只使用一个读进程和一个写进程。

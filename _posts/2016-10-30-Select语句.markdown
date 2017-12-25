@@ -1,0 +1,82 @@
+title: Select语句
+date: 2016-10-30 09:30:33
+updated: 2017-02-21 15:16:00
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+为了使用**SELECT**检索表数据，必须至少给出两条信息——想选择什么，以及从什么地方选择。
+
+## 1 检索单个列
+
+```SQL
+SELECT item FROM someTable;
+```
+
+上述语句表示利用SELECT语句从*someTable*中检索一个名为*item*的列。
+所需的列名在SELECT关键字之后给出，FROM指出从其中检索数据的表名。
+
+## 2 检索多个列
+
+检索多个列与检索单个列使用相同的SELECT语句，唯一的不同是必须在SELECT关键字后给出多个列名，列名之间必须以逗号分隔。
+
+## 3 检索所有列
+为了检索所有列，可以使用通配符(*)来达到目的，如
+
+```SQL
+SELECT * FROM someTable;
+```
+
+返回列的顺序一般是列在表中定义出现的顺序。
+
+- 优缺点
+    
+    使用通配符往往会检索出不需要的列从而降低检索和应用程序的性能，但其优点就是，但你不知道明确的列名时，可以检索出来。
+
+## 4 检索不同的行
+
+```SQL
+SELECT id FROM someTable;
+```
+
+上述语句表示利用SELECT语句从*someTable*中检索一个名为*id*的列的所有行。
+所需的列名在SELECT关键字之后给出，FROM指出从其中检索数据的表名。
+
+如果在SELECT后加上**DISTINCT**关键字，则仅返回不同的行值，即具有相同的行值的将只显示一个。
+举个例子：
+
+```SQL
+SELECT DISTINCT id FROM someTable;
+```
+
+如上方的例子将显示不重复的**id**值。
+
+## 5 限制结果
+SELECT语句返回所有匹配的行，它们可能是指定表中的每个行。为了返回第一行或前几行，可使用LIMIT子句。
+
+### 5.1 限制行值数
+
+```
+SELECT id 
+FROM someTable
+LIMIT 5;
+```
+
+上述的例子将返回不超过5行的行值。
+
+### 5.2 选取行值位置
+
+```
+SELECT id 
+FROM someTable
+LIMIT 5,5;
+```
+
+上述的例子表明选取从行*5*开始的5行。
+
+- 注意
+    + 第一行是**行0**。
+    + 在行数不够时，只能得到他能返回的最多行。
+    + 一种更清晰的LIMIT用法是**LIMIT poisition OFFSET nums**，表示从行**poisition**开始读取**nums**行。

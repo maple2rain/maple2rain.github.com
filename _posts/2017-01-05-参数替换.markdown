@@ -1,0 +1,67 @@
+title: 参数替换
+date: 2017-01-05 16:37:49
+updated: 2017-01-05 17:01:47
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Base
+---
+## 1 参数扩展
+
+```sh
+${param}extension
+```
+
+使用上述命令后，参数**param**即可与扩展参数**extension**结合生成新的参数**paramextension**。
+
+## 2 参数替换
+
+|      命令形式     |                                     说明                                    |
+|-------------------|-----------------------------------------------------------------------------|
+| \${param:-default} | 如果param为空，就把它设置为default的值                                      |
+| \${param:=default} | 如果param不存在或为空，就把它设置为default的值并返回;否则直接返回该变量的值 |
+| \${param:?default} | 如果param不存在或为空，则输出param:default并异常终止脚本程序                |
+| \${param:+default} | 如果param存在且不为空，就返回default                                        |
+| \${#param}         | 给出param的长度                                                             |
+| \${param%word}     | 从param的尾部开始删除与word匹配的最小部分，然后返回剩余部分                 |
+| \${param%%word}    | 从param的尾部开始删除与word匹配的最长部分，然后返回剩余部分                 |
+| \${param#word}     | 从param的头部开始删除与word匹配的最小部分，然后返回剩余部分                 |
+| \${param##word}    | 从param的头部开始删除与word匹配的最长部分，然后返回剩余部分                 |
+
+## 3 例子
+
+脚本内容如下所示：
+```sh
+#!/bin/sh
+
+for i in 1 2
+do
+    test=${i}_tmp
+    echo $test
+done
+
+unset foo
+echo ${foo:-bar}
+
+foo=fud
+echo ${foo:-bar}
+
+foo=/usr/bin/X11/startx
+echo ${foo#*/}
+echo ${foo##*/}
+
+bar=/usr/local/etc/local/networks
+echo ${bar%local*}
+echo ${bar%%local*}
+
+exit 0
+```
+
+执行结果如下所示：
+![](../post_img/586e0698ab6441236e004653)

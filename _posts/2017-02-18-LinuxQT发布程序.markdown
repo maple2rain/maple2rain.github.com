@@ -1,0 +1,37 @@
+title: Linux QT 发布程序
+date: 2017-02-18 21:26:57
+updated: 2017-02-18 21:43:14
+tags:
+- QT
+categories:
+- Study
+- Computer
+- Graphics
+- QT
+---
+## 1 使用Release版本编译
+
+对将要发布的程序，编译方式设置为`Release`，并进行重新编译。
+
+## 2 提取可执行文件
+
+在`Release`文件夹下提取出可执行文件，并将其放置于某一指定文件夹，该文件夹将在之后放置链接库
+
+## 3 导出链接库至指定文件夹
+
+首先，可以使用`ldd`命令查看需要的链接库，如`ldd test`。为了方便导出链接库，可直接使用以下脚本导出。
+
+```sh
+#!/bin/sh  
+
+exe=$1 #deploy program
+des=$2 #dir path
+  
+deplist=$(ldd $exe | awk  '{if (match($3,"/")){ printf("%s "),$3 } }')  
+cp $deplist $des  
+```
+假使将该脚本保存为`deploy.sh`，并为其添加可执行权限，则使用方法为`deploy.sh exe path`，其中`exe`为可执行程序名，`path`为指定文件夹。
+
+## 4 发布程序
+
+完成上述步骤后，即可发布程序，在未装QT的Linux环境下，执行可执行程序即可运行。

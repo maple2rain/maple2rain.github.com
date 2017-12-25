@@ -1,0 +1,192 @@
+title: 时间和日期
+date: 2016-10-30 16:07:12
+updated: 2017-02-21 15:12:14
+tags:
+- LinuxAPI
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Environment
+---
+
+## 1 时间
+
+### 1.1 获取时间
+
+**time**函数用于获得底层的时间值，它返回的是从纪元(1970年1月1日午夜0点)开始至今的秒数。
+
+- 函数原型
+
+```c
+/**
+ * tloc     :时间指针,为空指针时获得当前时间，否则将时间写进该指针指向的位置
+ * 头文件    :time.h
+ * 返回值    :从纪元开始到现在的秒数
+ */
+time_t time(time_t *tloc);
+```
+
+- 获取当前时间
+
+```c
+#include <time.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    time_t the_time;
+    the_time = time((time_t*)0);
+    printf("The time is %ld\n", the_time);
+     
+    exit(0);
+}
+```
+
+- 执行结果
+        ![title](../post_img/5815aa3aab644162e10045f8)
+
+### 1.2 时间差
+
+**difftime**函数用于计算两个**time_t**值之间的秒数并以double类型返回它。
+
+- 函数原型
+
+```c
+/**
+* time1    :起始时间
+* time2    :终止时间
+* 返回值   :time1-time2的值
+* 头文件   :time.h
+*/
+double difftime(time_t time1, time_t time2);
+```
+
+### 1.3 更有意义的时间
+
+**gmtime**函数把底层时间值分解为一个结构，该结构包含一些常用成员：
+
+- 时间结构tm
+
+    |    tm成员    |          说明          |
+    |--------------|------------------------|
+    | int tm_sec   | 秒，0~59               |
+    | int tm_min   | 分，0~59               |
+    | int tm_hour  | 小时，0~23             |
+    | int tm_mday  | 月份中的日期，1~31     |
+    | int tm_mon   | 月份，0~11，一月份为0  |
+    | int tm_year  | 从1900年开始计算的年份 |
+    | int tm_wday  | 星期几，0~6，周日为0   |
+    | int tm_yday  | 年份中的日期，0~365    |
+    | int tm_isdst | 是否夏令时             |
+
+- 函数原型
+
+```c
+/**
+ * timeval  :时间
+ * 返回值   :tm结构体指针
+ * 头文件   :time.h
+ */
+struct tm *gmtime(const time_t *timeval);
+```
+
+- 例子
+
+```c
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    struct tm *tm_ptr;
+    time_t the_time;
+
+    (void)time(&the_time);//获取时间
+    tm_ptr = gmtime(&the_time);//获取gmtime指针
+
+    printf("Raw time is %ld\n", the_time);
+    printf("This is gmtime:\n");
+    printf("\tdate: %02d/%02d/%02d\n",
+        tm_ptr->tm_year, tm_ptr->tm_mon + 1, tm_ptr->tm_mday);
+    printf("\ttime: %02d:%02d:%02d\n",
+        tm_ptr->tm_hour, tm_ptr->tm_min, tm_ptr->tm_sec);
+    
+    exit(0);
+}
+```
+
+- 执行结果
+    ![title](../post_img/5815aa4aab644164d4004471)
+    程序执行后再执行date命令，与其对比，可见，在采用了夏令时的系统里，时间是不对的，因为**gmtime**返回的是UTC时间，即世界标准时间。在中国，是相差8个小时。
+
+### 1.4 其他更有意义的时间函数
+
+#### 1.4.1 localtime
+
+- 函数原型
+
+```c
+/**
+ * timeval  :时间
+ * 返回值   :tm结构体指针，本地时间
+ * 头文件   :time.h
+ */
+struct tm *localtime(const time_t *timeval);
+```
+
+#### 1.4.2 mktime
+
+使用**mktime**函数可以把分解出来的**tm**结构转换为原始的**time_t**时间值。
+如果**tm**结构不能表示为**time_t**值，则返回-1。
+
+- 函数原型
+
+```c
+/**
+ * timeptr  :tm结构体指针
+ * 返回值   :时间值
+ * 头文件   :time.h
+ */
+time_t mktime(struct tm *timeptr);
+```
+
+#### 1.4.3 asctime
+
+**asctime**函数返回一个字符转，表示由**tm**结构所给出的时间和日期。这个字符串有类似下面的格式。
+    ![title](../post_img/5815aa5dab644162e10045fa)
+
+- 函数原型
+
+```c
+/**
+ * timeptr  :tm结构体指针
+ * 返回值   :时间格式字符串
+ * 头文件   :time.h
+ */
+char *asctime(const struct tm *timeptr);
+```
+
+#### 1.4.4 ctime
+
+**ctime**函数等效于调用下面这个函数。
+
+```c
+asctime(localtime(timeval));
+```
+
+- 函数原型
+
+```c
+/**
+- timeval  :时间
+- 返回值   :时间格式字符串
+- 头文件   :time.h
+*/
+char *ctime(const time_t *timeval);
+```

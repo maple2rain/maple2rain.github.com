@@ -1,0 +1,47 @@
+title: 循环处理文件数据
+date: 2017-01-05 16:52:32
+updated: 2017-01-05 17:02:11
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Structure  Stament
+---
+## 1 遍历文件数据
+
+遍历文件数据可以结合两种技术：
+
+- 使用嵌套循环
+- 修改**IFS**环境变量
+
+通过修改**IFS**环境变量，就能强制循环中的对文件的每行都当成一个条目来处理。
+一旦从文件中提取出了单独的行，就可能需要再次循环来提取其中的数据。
+
+## 2 经典例子
+
+一个经典的例子是处理**/etc/passwd**文件中的数据，这要求将在遍历该文件的每一行时将**IFS**值修改为冒号，从而分隔出每行中的单个数据段。
+
+```sh
+#!/bin/bash
+# cat /etc/passwd with loop
+
+IFS.OLD=$IFS
+IFS=$'\n'
+for entry in `cat /etc/passwd`
+do
+    echo "values in $entry - "
+    IFS=:
+        for value in $entry
+        do
+            echo "   $value"
+        done
+done
+IFS=$IFS.OLD
+```
+部分输出如下所示：
+![](../post_img/586e095dab6441236e00472b)

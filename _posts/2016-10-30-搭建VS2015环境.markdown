@@ -1,0 +1,84 @@
+title: 搭建VS2015环境
+date: 2016-10-30 09:21:29
+updated: 2017-03-15 17:29:08
+tags:
+- OpenCV
+categories:
+- Study
+- Computer
+- Graphics
+- OpenCV
+---
+## 1 下载OpenCv3.1
+
+首先是需要下载OpenCv库，在[下载链接](http://opencv.org/downloads.html)中可以选择不同平台及不同版本的OpenCv，在此先选择下载**Version 3.1**Windows版本。
+ 下载后，将其解压到指定的文件夹中即可使用，如下所示：
+![解压路径](../post_img/58c90965ab64417ac30049e4)
+
+## 2 配置系统环境
+
+### 2.1 新建环境变量
+按“Windows + PauseBreak”键 > 高级系统设置 > 环境变量，选择**系统变量**区新建OpenCv环境变量，环境变量路径为OpenCv安装位置，如我的安装位置为*G:\Opencv3.1*，则在其后面添加*build*目录
+![环境路径](../post_img/58c90965ab64417ac30049e6)
+
+完成后点击**确定**。
+
+### 2.2 添加Path变量
+
+在刚才的**环境变量**界面的**系统变量**区选择*Path*变量进行编辑，然后添加**%Opencv%\x64\vc14\bin**，目的是为了工程项目能找到一些相关的库。
+![Path变量](../post_img/58c90965ab64417ac30049e7)
+完成后点击确定。
+
+## 3添加包含文件及库文件
+
+打开VS2015，新建Win32控制台应用程序。
+右击项目名称 > 属性 > VC++目录 。
+在**包含目录**中添加以下路径：
+
+    $(Opencv)\include\opencv2;$(Opencv)\include\opencv;$(Opencv)\include;
+
+在**库目录**中添加以下路径
+
+    $(Opencv)\x64\vc14\lib;
+
+## 4 添加依赖项
+
+右击项目名称 > 属性 > 连接器 > 输入。
+在**附加依赖项**中编辑添加两个依赖项：
+
+    opencv_world310d.lib;opencv_world310.lib;
+
+他们放置在**$(Opencv)\x64\vc14\lib**中，其中**$(Opencv)**表示为之前设定的环境变量值，也即安装目录。
+
+## 5 测试
+
+测试代码如下：
+
+```cpp
+//显示图像文件  
+#include <opencv2/opencv.hpp> 
+#include <iostream>
+#include "cv.h"
+#include "cxcore.h"
+#include "highgui.h"
+using namespace std;
+using namespace cv;
+#pragma comment(linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"")
+int main()
+{
+    Mat image = imread("testPicture.jpg");//字符串为你要测试的图片的名字
+    if (image.empty())
+    {
+        cout << "error" << endl;
+        return -1;
+    }
+    imshow("Image", image);              //显示图片
+    waitKey();
+    return 0;
+}  
+```
+    
+按下*F5*运行之后，如果能够正常运行的话，就会显示出你指定的图片了，如下所示：
+![运行图片](../post_img/58c90965ab64417ac30049e5)
+##  6 注意
+此时的运行环境为**x64**，因此在**活动方案解决配置**选择**Debug**或**Realease**选项时，**活动解决方案平台**应选择**x64**，否则会出现库不兼容的情况。

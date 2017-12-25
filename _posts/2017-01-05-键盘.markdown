@@ -1,0 +1,38 @@
+title: 键盘
+date: 2017-01-05 16:23:12
+updated: 2017-01-05 16:30:19
+tags:
+- Linux Terminal
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Terminal
+---
+## 1 键盘模式
+
+**curses**函数库不仅提供了控制屏幕显示的易用接口，该提供了控制键盘的简单方法。
+
+- 基本API
+
+    |        原型        |                        说明                        |
+    |--------------------|----------------------------------------------------|
+    | int echo(void)     | 开启输入字符回显功能                               |
+    | int noecho(void)   | 关闭输入字符回显功能                               |
+    | int cbreak(void)   | 字符一经键入就立刻传递给程序                       |
+    | int nocbreak(void) | 所有处理都基于行，即按下回车后输入数据才传送给程序 |
+    | int raw(void)      | 关闭特殊字符处理                                   |
+    | int noraw(void)    | 恢复特殊字符处理                                   |
+
+## 2 键盘输入
+
+- 基本API
+
+    |                        原型                        |                   说明                   |
+    |----------------------------------------------------|------------------------------------------|
+    | int getch(void)                                    | 获取一个字符并返回之                     |
+    | int getstr(char *string)                           | 获取一个字符串，长度没有限制             |
+    | int getnstr(char *string, int number_of_characters | 获取一个字符串，长度限制为第二个参数的值 |
+    | int scanw(char *format, ...)                       | 与scanf类似，读取字符串                  |

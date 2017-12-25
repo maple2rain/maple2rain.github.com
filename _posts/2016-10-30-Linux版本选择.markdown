@@ -1,0 +1,35 @@
+title: Linux版本选择
+date: 2016-10-30 15:57:14
+updated: 2017-02-21 15:07:44
+categories:
+- Study
+- Computer
+- OS
+- Linux
+---
+## 1 家庭版
+
+如果只是在家里使用的话，并且不搞开发，可以选择**Deepin**，因为他对windows软件有较多的支持。
+也可以选择**Mandriva**试试，不过公司已经破产，没有更新。
+也可以试试**openSUSE**。
+或者使用家庭专业版**SimplyMEPIS**
+
+## 2 Debian与Ubuntu
+
+- Debian稳定性很好，而Ubuntu有时会出现内部错误。
+- Debian占用硬盘空间较小，内存较少
+- 不过，在选择时，由于Ubuntu的商业性较强，因此支持也比较多，所以如若不使用服务器版，一般选择Ubuntu。
+
+## 3 CentOS与Fedora
+
+- CentOS一般用于服务器开发，由Redhat代码编译而来。
+- Fedora用于开发版，尝试较新的软件开发，让其在这平台上运行。
+
+## 4 LinuxMint
+
+- 适合新手，xfce和mate Cinnamon桌面环境与windows类似。
+
+## 5 Arch
+
+- 每次安装软件时需要自己手动配置
+- 滚动发布新版本？

@@ -1,0 +1,43 @@
+title: 中序遍历二叉树的下个节点
+date: 2017-02-09 14:58:20
+updated: 2017-02-09 15:14:56
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给出一棵二叉树里的一个节点，求其中序遍历时的下一个节点。在这棵二叉树里，每个节点均有指向其父节点的指针
+
+## 思路
+
+中序遍历的过程是首先遍历左子树，然后访问根节点，最后遍历右子树。因此，根据定义，需要判断节点类型
+
+1. 如果有右子树，那么其中序遍历的下一个节点是右子树的最左节点
+2. 如果没有右子树，则有两种情况
+    - 如果节点是其父节点的左节点，那么其中序遍历的下一个节点即为其父节点
+    - 如果节点是父节点的右节点，那么向上查看其父节点，直到找出节点是父节点的左节点为止，并返回该父节点
+
+```java
+TreeNode inorderSucc(TreeNode e){
+    if(e == null) return null;
+    if(e.right != null){
+        //the left most is the next node to visit
+        return getLeftMost(e.right);
+    }else{
+        TreeNode p = e.parent;
+        //find the node whose parent's left node is the node, then return the parent
+        while(p != null && p.left != e){
+            e = p;
+            p = p.parent;
+        }
+        
+        return p;
+    }
+}
+
+TreeNode getLeftMost(TreeNode e){
+    TreeNode res = e;
+    while(res.left != null)
+        res = res.left;
+    return res;
+```

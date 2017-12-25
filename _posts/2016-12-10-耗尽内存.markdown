@@ -1,0 +1,49 @@
+title: 耗尽内存
+date: 2016-12-10 10:57:30
+updated: 2017-02-22 20:31:20
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+---
+# 1 new-handler
+当`operator new()`找不到足够的连续内存块来安排对象时，一个称为`new-handler`的特殊函数将会被调用。
+如果是非内置类型，则不会调用构造函数。
+
+- 首先，检查指向该函数的指针
+- 如果指针非0，那么它指向的函数将会被调用
+
+# 2 抛出异常
+
+`new-handler`的默认动作是产生一个异常(throw an exception)，当用于堆分配的情况下，可以提供相关的信息以增加容错的恢复性。
+通过包含`new.h`来替换`new-handler`，然后以想装入的函数地址为参数调用`set_new_handler`函数。
+
+```c++
+#include <iostream>
+#include <cstdlib>
+#include <new>
+using namespace std;
+
+int count = 0;
+
+void out_of_memory() { // function to replace new_handler 
+  cerr << "memory exhausted after " << count 
+    << " allocations!" << endl;
+  exit(1);
+}
+
+int main() {
+  set_new_handler(out_of_memory); // replace new_handler
+  while(1) {
+    count++;
+    new int[1000]; // Exhausts memory
+  }
+} ///:~
+```
+
+`new_handler`函数必须不带参数且其返回值为`void`。
+上述例子在不断分配内存时，在出现没有多余内存可用时，调用`new_handler`。
+`new_handler`的行为和`operator new()`绑定在一起，如果重载了`operator new()`，则不会调用`new_handler`。如果仍想使用，则需要在重载的代码里加上做这些工作的代码。

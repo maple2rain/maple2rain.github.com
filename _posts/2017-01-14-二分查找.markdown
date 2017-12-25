@@ -1,0 +1,150 @@
+title: 二分查找
+date: 2017-01-14 17:56:16
+updated: 2017-02-21 15:19:42
+categories:
+- Study
+- Algorithm
+---
+## 概述
+
+二分查找又称折半查找，优点是比较次数少，查找速度快，平均性能好；其缺点是要求待查表为有序表，且插入删除困难。因此，折半查找方法适用于不经常变动而查找频繁的有序列表。
+
+## 算法要求
+
+1. 数据采用顺序存储结构
+2. 数据按关键字大小有序排列
+
+## 算法过程
+
+- 首先，假设表中元素是按升序排列
+- 将表中间位置记录的关键字与查找关键字比较，如果两者相等，则查找成功
+- 否则利用中间位置记录将表分成前、后两个子表，如果中间位置记录的关键字大于查找关键字，则进一步查找前一子表，否则进一步查找后一子表
+- 重复以上过程，直到找到满足条件的记录，使查找成功，或直到子表不存在为止，此时查找不成功
+
+## 算法复杂度
+
+二分查找的思想是将n个元素分成大致相等的两部分，并在每一次搜索过程中都将查找范围缩减为原来的一半。
+由于总共有n个元素，每次查找的范围为：n, $\frac{n}{2}$, $\frac{n}{4}$, ..., $\frac{n}{2^k}$(k为查找次数)
+
+最终可得$k = log_2 n$，即算法时间复杂度为$O(log_n)$.
+
+## 算法实现
+
+```c
+int binarySearch(int array[], int length, int key)
+{
+    int high = length; //the length of array
+    int low = -1;     //-1 is an invalid value
+    
+    while (high - low > 1){
+        int probe = low + ((high - low) >> 1);
+        if (array[probe] > key)
+            high = probe;
+        else
+            low = probe;
+    }
+    if (low == -1 || key != array[low])
+        return -1;
+    else
+        return low;
+}
+```
+
+### 关键点描述
+
+- 在3、4行中，注意到`high`和`low`边界被设置为数组两端偏移一个元素处，在初始化时他们都不是一个有效的索引值，这就消除了所有关于边界判断的问题
+- 第6行的循环终止条件是`high`和`low`这两个索引最终相邻;在程序中，并没有判断目标是否被找到
+- 在第7行中，尤为注意的是，本来可以写成`probe = (high + low) / 2`，但实际上这可能会导致整数溢出问题
+- 从第8行到第11行中，一直使用赋值的方式，使得
+    - `low`要么是-1, 要么是指向一个不大于目标值的值
+    - `high`要么指向数组尾端后一个位置，要么指向一个大于目标值的值
+- 最后，在循环结束时，只是检查`low`的值，如果他不是-1, 要么他就是期望的目标值，要么就是数组不存在这个目标值
+
+## 关于循环
+
+> 在上面的二分查找中，为什么不在检测到了目标值的时候就退出循环呢？
+
+实际上，上述代码的行为才是正确的。考虑如下：
+
+- 假设有一个有着n个元素的数组(此时n为很大的数值)
+- 第一次查找就找到目标的概率为$\frac{1}{n}$
+- 第二次查找找到目标的概率为$\frac{1}{n / 2}$
+- 以此类推，在前阶段，概率仍然是很小的
+- 实际上，只有当元素的个数减少到了10～20的时候，一次找到目标的概率才变得有意义，而对于此时进行查找需要的只是大概4次循环
+- 而查找失败时(大多数情况下)，那些额外的测试就将变成纯粹的额外开销
+
+## 测试
+
+为了测试上述理论的有效性，可以编写测试代码。如下：
+
+```c
+/* binary search in my way */
+int binarySearchCount1(int array[], int length, int key)
+{
+    int high = length;  //the length of array
+    int low = -1;       //-1 is an invalid value
+    int comparisonCount = 0;
+    while (high - low > 1){
+        comparisonCount += 2;
+        int probe = low + ((high - low) >> 1);
+        if (array[probe] > key)
+            high = probe;
+        else
+            low = probe;
+    }
+
+    return comparisonCount;
+}
+
+/* binary search in normal way */
+int binarySearchCount2(int array[], int length, int key)
+{
+    int high = length - 1;
+    int low = 0;
+    int comparisonCount = 0;
+
+    while(low <= high){
+        ++comparisonCount;
+        int mid = low + (high - low) / 2;
+        if(array[mid] < key){
+            comparisonCount += 1;   //compare one times
+            low = mid + 1;
+        }
+        else if(array[mid] > key){
+            comparisonCount += 2;   //compare two times
+            high = mid - 1;
+        }
+        else
+            return comparisonCount + 2; //compare two times
+    }
+    return comparisonCount;
+}
+
+/* test and count */
+int count1 = 0, count2 = 0;
+for(int i = 0; i < N; ++i){
+    /* count every element's searched times */
+    count1 += binarySearchCount1(array, N, array[i]);
+    count2 += binarySearchCount2(array, N, array[i]);
+}
+```
+
+在对一个随机生成的数组每一个元素进行查找次数之和列表如下：
+|数组长度\查找方案|算法1|算法2|
+|---|
+|1|2|3|
+|2|10|11|
+|4|30|32|
+|8|82|87|
+|16|214|228|
+|32|538|579|
+|64|1310|1428|
+|128|3106|3431|
+|256|7206|8060|
+|512|16426|18577|
+|1024|36910|42104|
+|2048|81970|94223|
+|...|...|...|
+|65536|3932230|4471471|
+
+可以明显看到，在对随机生成的有序数组进行每一个元素的查找时，总共的查找次数比较中，算法1总是少于算法2,这就证明实际上的二分查找中，算法2的实现实际上在每一次比较时都可能会有比较多一次的情况，只不过由于会提前退出循环，看起来好像效率会高，实际上是进行了多余开销的额外操作。而就算是二分查找，尽管查找效率是$O(log_n)$，但由于实际上需要额外的比较，如边界的判断，从而造就了算法实际的比较次数要多一点。但仍不失为一个较为优雅的算法。

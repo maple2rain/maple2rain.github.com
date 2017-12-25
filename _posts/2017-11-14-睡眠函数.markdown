@@ -1,0 +1,35 @@
+title: 睡眠函数
+date: 2017-11-14 15:04:23
+updated: 2017-11-14 15:11:55
+categories:
+- Study
+- BugCollections
+- Linux
+---
+## 问题
+
+在开发使用睡眠函数让线程挂起时，遇到线程挂起很久迟迟不醒来的问题。后来才发现，是睡眠`太久了`。
+
+## 解决
+
+在linux下，有两个睡眠函数，分别是`sleep`和`usleep`。其中`sleep`的参数是指定的秒数，而`usleep`是指定微秒数。如果不注意的话，很容易让线程挂起很久而不知道出现什么情况。
+
+### sleep
+
+|定义|描述|
+|---|---|
+|函数名|sleep|
+|头文件|unistd.h|
+|功能|执行挂起指定的秒数|
+|原型|unsigned sleep(unsigned seconds);|
+
+### usleep
+
+|定义|描述|
+|---|---|
+|函数名|usleep|
+|头文件|unistd.h|
+|功能|执行挂起指定的微秒数|
+|原型|void usleep(int micro_seconds);|
+
+    

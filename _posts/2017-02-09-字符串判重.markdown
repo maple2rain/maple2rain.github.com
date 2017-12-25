@@ -1,0 +1,43 @@
+title: 字符串判重
+date: 2017-02-09 15:29:18
+updated: 2017-02-10 13:00:43
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给定字符串，判断该串是否不含有重复字符
+
+## 提问
+
+问：字符的编码是UTF-8还是ASCII码？
+答：对于两者，你会怎么处理
+问：两者都可以使用哈系表来记录字符的出现情况。但如果是ASCII码，则可以使用长度为256的布尔数组节省空间
+
+```java
+//only for ASCII
+boolean isUniqueChars(String str){
+    //judge whether the length of str more than 256, which mean it must have duplicate chars
+    boolean [] char_set = new boolean[256];
+    for (int i = 0; i < str.length(); ++i){
+        int val = str.charAt(i);
+        if( char_set[val] ) return false;
+        char_set[val] = true;
+    }
+    return true;
+}
+
+//only for string consisted of a to z
+boolean isUniqueChars(String str){
+    int checker = 0;
+    str = str.toLowerCase();
+    
+    for (int i = 0; i < str.length; ++i){
+        int val = str.charAt(i) - 'a';
+        if((checker & (1 << val)) != 0) return false;
+        checker |= 1 << val;
+    }
+    
+    return true;
+}
+```

@@ -1,0 +1,66 @@
+title: 日志
+date: 2016-10-30 15:57:02
+updated: 2017-02-21 15:12:26
+tags:
+- LinuxAPI
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Environment
+---
+
+## 1 记录日志
+
+系统程序经常需要向控制台或日志文件写消息。
+这些消息可能指示错误、警告或系统状态有关的一般信息。
+日志一般在**/var/log/**目录下。
+
+虽然系统消息的格式和存储方式不仅相同，但产生消息的方法却是标准的。
+**UNIX**规范通过**syslog**函数为所有程序产生日志消息提供了一个接口。
+
+- 函数原型
+
+    ```c
+    /**
+     * priority     :严重级别
+     * message      :消息
+     * arguments    :与printf格式类似的可变参数
+     * 头文件       :syslog.h
+     */
+    void syslog(int priority, const char *message, argument...);
+    ```
+
+- priority
+
+    **syslog**函数向系统日志设施发送一条日志信息，每条信息都有一个priority参数，该参数是**一个严重级别与一个设施值的按位或**。
+
+    - 严重级别控制日志信息的处理方式
+        严重级别按优先级递减排列，如下表所示
+        |   优先级    |             说明             |
+        |-------------|------------------------------|
+        | LOG_EMERG   | 紧急情况                     |
+        | LOG_ALERT   | 高优先级故障，如数据库崩溃等 |
+        | LOG_CRIT    | 严重错误，如硬件故障         |
+        | LOG_ERR     | 错误                         |
+        | LOG_WARNING | 警告                         |
+        | LOG_NOTICE  | 需要注意的特殊情况           |
+        | LOG_INFO    | 一般信息                     |
+        | LOG_DEBUG   | 调试信息                     |
+
+    - 设施值记录日志信息的来源
+        定义在头文件syslog.h中的设施值包括**LOG_USER**(默认值)——他指出消息来自一个用户应用程序。
+        以及LOG_LOCAL0——LOG_LOCAL7，他们的含义由本地管理员指定。
+
+- message
+
+    syslog创建的日志消息包含消息头和消息体。
+    消息头根据设施值及日期和时间创建。
+    消息体根据message参数创建。
+    syslog的其他参数要根据message字符串中printf风格的转换控制符而定。
+    此外，转换控制符**%m**可用于插入与错误变量errno当前值对应的出错消息字符串。
+    ```c
+    syslog(LOG_ERR | LOG_USER, "Error is %m\n"); //优先级为错误，消息由用户创建，作用是输出errno错误值
+    ```

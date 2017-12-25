@@ -1,0 +1,89 @@
+title: 判断是否为平衡二叉树
+date: 2017-02-25 11:31:45
+updated: 2017-02-25 11:53:19
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 对于一棵给定的二叉树，判断其是否为平衡二叉树。
+
+## 思路
+
+平衡二叉树的概念为，该二叉树是搜索二叉树，且对于树中的每一个结点，其左右子树的高度差不超过1。一种比较笨的方法是求出树中结点的每一个节点的高度，并比较其左右子树的高度差是否超过1。
+
+其中，求树的高度的方法为，
+
+- 如果一棵树只有一个结点，那么其高度为1
+- 如果拥有左子树而没有右子树，则树的高度为左子树的高度加1
+- 如果拥有右子树而没有左子树，则树的高度为右子树的高度加1
+- 否则，则为左右子树高度较大值加1
+
+实现如下：
+
+```c++
+int TreeDepth(BinaryTreeNode *pRoot)
+{
+    if (pRoot == nullptr)
+        return 0;
+    
+    int left = TreeDepth(pRoot->pLeft);
+    int right = TreeDepth(pRoot->pRight);
+    
+    return 1 + (left > right ? left : right);
+}
+```
+
+在判断是否为平衡二叉树时，可以从根到叶子结点的路径上不断判断树中是否存在不平衡，实现如下：
+
+```c++
+bool IsBalanced(BinaryTreeNode *pRoot)
+{
+    if (pRoot == nullptr)
+        return ture;
+        
+    int left = TreeDepth(pRoot->pLeft);
+    int right = TreeDepth(pRoot->pRight);
+    int diff = left - right;
+    
+    if(diff > 1 || diff < -1)
+        return false;
+    
+    return IsBalanced(pRoot->pLeft) && IsBalanced(pRoot->pRight);
+}
+```
+
+但很明显的是，上述算法需要不断地去遍历相同结点，导致很多冗余的运算。其实，可以利用后序遍历的方式，在每次访问时记录该结点的高度，判断其是否失衡即可。实现如下：
+
+```c++
+bool IsBalanced(BinaryTreeNode *pRoot, int &depth)
+{
+    if (pRoot == nullptr) {
+        depth = 0;
+        return true;
+    }
+    
+    int left, right;
+    
+    if (IsBalanced(pRoot->pLeft, left)
+        && IsBalanced(pRoot->pRight, right)) { //judge if left and right sub-tree balanced
+        int diff = left - right;
+        if (diff <= 1 && diff >= -1) {
+            depth = 1 + (left > right ? left : right); //record the depth
+            return true;
+        }
+    }
+    
+    return true;
+}
+```
+
+在实际调用中，需提供一个便利的接口，如下：
+
+```c++
+bool IsBalanced(BianryTreeNode *pRoot)
+{
+    int depth = 0;
+    return IsBalanced(pRoot, depth);
+}
+```

@@ -1,0 +1,55 @@
+title: 子查询
+date: 2016-10-30 09:34:20
+updated: 2017-02-21 15:16:38
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+## 1 子查询
+
+子查询即是嵌套在其他查询中的查询。
+因为有时信息是存储在多个表当中的，在查询时必须先得到某个表的信息在去进行下一步查询，故而需要用到嵌套查询，即子查询。
+
+## 2 使用子查询
+
+子查询是使用嵌套的SELECT语句与IN、=、<>等操作符搭配使用的，如
+
+```SQL
+SELECT ID 
+FROM orders
+WHERE orderNum IN (SELECT orderNum
+                   FROM orderItems
+                   WHERE proID = '100' );
+```
+
+上述例子将先从**orderItems**中取出**proID = '100'**的**orderNum**，再根据**orderNum**在**orders**中取出相应的**ID**。
+
+## 3 格式化SQL
+
+包含子查询的SELECT语句难以阅读和调试，特别是它们较为复杂时更是如此。如上所示把子查询分解为多行并且适当地进行缩进，能极大地简化子查询的使用。 
+
+对于能嵌套的子查询的数目没有限制，不过在实际使用时由于性能的限制，不能嵌套太多的子查询。
+
+## 4 计算字段使用子查询
+
+当需要从表中显示某些逻辑关系，如获取每个客户的订单总数时，此时需要用到计算字段。
+
+```SQL
+SELECT name,
+       (SELECT COUNT(*)
+        FROM orders
+        WHERE orders.id = customers.id) AS orders
+FROM customers
+GROUP BY name;
+```
+
+上述例子中的orders是一个计算字段，由圆括号的子查询建立。该子查询检索出的每个客户执行一次。
+
+另外，上述的WHERE语句用到了完全限定列名，用于精确锁定orders与customers各自的id。在不同表中有相同列名时需要用到完全限定列名。
+
+
+
+
+

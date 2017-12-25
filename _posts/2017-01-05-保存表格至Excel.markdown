@@ -1,0 +1,57 @@
+title: 保存表格至Excel
+date: 2017-01-05 14:34:08
+updated: 2017-01-05 16:00:49
+tags:
+- QT
+categories:
+- Study
+- Computer
+- Graphics
+- QT
+---
+# 1 表格保存于Excel
+
+为了将表格中的数据保存至Excel表中，可以首先将表格中的每一行以文本方式保存，再将该文本保存于Excel表中，实现代码如下：
+
+```c++
+void Table2ExcelByTxt(QTableWidget *table, QString tableName)
+{
+    QString filepath = 
+        QFileDialog::getSaveFileName(this, 
+                                    tr((QString("Save %1").arg(tableName)).toLocal8Bit()),//fileDialog title
+                                    QString(), 
+                                    tr("EXCEL files (*.xls *.xlsx);;HTML-Files (*.txt);;"));//store file type
+    
+    int row = table->rowCount();
+    int col = table->columnCount();
+    QList<QString> list;
+    
+    //add header row
+    QString HeaderRow;
+    for(int i = 0; i < col; ++i){
+        HeaderRow.append(table->horizontalHeaderItem(i)->text() + "\t");//store header 
+    }
+    list.push_back(HeaderRow);
+    for(int i = 0; i < row; ++i){
+        QString rowStr = "";
+        for(int j = 0; j < col; ++j){
+            rowStr += table->item(i, j)->text() + "\t";//store each column value
+        }
+        list.push_back(rowStr);
+    }
+    
+    //add text list to textedit
+    QTextEdit textEdit;
+    for(int i = 0; i < list.size(); ++i){
+        textEdit.append(list.at(i));
+    }
+    
+    QFile file(filepath);
+    if(file.open(QFile::WriteOnly | QIODevice::Text)){
+        QTextStream ts(&file);
+        ts.setCodec("UTF-8");
+        ts << textEdit.document()->toPlainText();
+        file.close();
+    }
+}
+```

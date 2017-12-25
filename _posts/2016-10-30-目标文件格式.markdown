@@ -1,0 +1,208 @@
+title: 目标文件格式
+date: 2016-10-30 13:38:10
+updated: 2017-04-23 11:55:57
+tags:
+- FileFMT
+categories:
+- Study
+- Computer
+- PL
+- Asm
+---
+# 目标文件格式
+
+## 1 目标文件组织
+
+目标文件通常以几个字节组成的文件头开始。
+
+- 文件头包括若干标记**信息(signature information)**，用于标识文件为有效的目标文件
+- 另一些值指出若干数据结构在文件中的位置
+
+除了文件头外，目标文件通常分成几个区域，每一区域包含应用程序数据、机器指令、符号表象、重定位数据及其他有关程序的元数据。实际代码和数据有时只占整个代码文件的一小部分。
+
+## 2 COFF文件
+
+**COFF(Common Object File Format)**是通用的目标文件格式，很多目标文件格式都是对**COFF**格式的扩展。
+
+- 文件布局
+
+    |  文件布局  |
+    |------------|
+    | COFF文件头 |
+    | 可选文件头 |
+    | 区域头     |
+    | 区域内容   |
+    | 重定位信息 |
+    | 行号信息   |
+    | 符号表     |
+    | 字符串表   |
+
+### 2.1 COFF文件头
+
+每个**COFF**文件以**COFF file header**起始。
+
+```c
+//winth.h from Windows
+typedef struct _IMAGE_FILE_HEADER{
+    WORD    Machine;                //标识创建此COFF文件的系统
+    WORD    NumberOfSections;       //区域数，被链接器利用以遍历各区域头
+    DWORD   TimeDateStamp;          //文件的创建日期
+    DWORD   PointerToSymbols;       //文件偏移量，说明符号表在文件的起始位置
+    DWORD   NumberOfSymbols;        //符号表项的数目
+    WORD    SizeOfOptionalHeader;   //可选头区域的字节数
+    WORD    Characteristics;        //标志位
+}IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
+
+//conn.f form Linux
+struct COFF_filehdr{
+    char f_magic[2];    //幻数，标识创建此COFF文件的系统
+    char f_nscns[2];    //区域数，被链接器利用以遍历各区域头
+    char f_timdat[4];   //日期、时间戳
+    char f_symptr[4];   //指向符号表的文件指针
+    char f_nsyms[4];    //符号表项的数目
+    char f_opthdr[2];   //可选头区域的字节数
+    char f_flags[2];    //标志位
+};
+```
+
+- 符号表
+
+    **符号表**是一种数据结构，说明**COFF**文件中代码用到的所有外部、全局及其他符号的名字等信息。
+    链接器使用符号表来解析外部引用。
+    符号表信息也可能出现在最终的可执行文件中，以供符号调试器使用。
+
+- 可选头区域
+
+    文件头区域后面是可选头区域。
+    链接器或其他目标码操作程序将以**可选头区域的字节数**确定可选头信息在文件的何处结束，从而开始区域头的信息。
+    若不存在可选头信息，则文件头后就是第一个区域头的信息。
+
+- 标志位
+
+    这是一个很小的位集合，包括若干布尔标志位，知识诸如文件是否可执行、有无符号信息、是否提供调试器使用的行号信息等等。
+
+### 2.2 COFF可选文件头
+
+**COFF**可选文件头的内容与可执行文件有关。
+如果可执行文件内容并非可执行的目标码**(存在着未解析的引用)**，就可能没有可选头。
+然而即使可执行文件不可执行，**COFF**文件仍存在可选头。
+
+```c
+//Microsoft PE/COFF from winnt.h
+typedef struct _IMAGE_OPTIONAL_HEADER {
+    // Standard fields
+    WORD    Magic;
+    BYTE    MajorLinkerVersion;
+    BYTE    MinorLinkerVersion;
+    DWORD   SizeOfCode;
+    DWORD   SizeOfInitializedData;
+    DWORD   SizeOfUninitializedData;
+    DWORD   AddressOfEntryPoint;
+    DWORD   BaseOfCode;
+    DWORD   BaseOfData;
+
+    // NT additional fields，Windows版本的可选头增加部分字段存放着程序员想向Windows链接器说明的值
+    DWORD   ImageBase;
+    DWORD   SectionAlignment;
+    DWORD   FileAlignment;
+    WORD    MajorOperatingSystemVersion;
+    WORD    MinorOperatingSystemVersion;
+    WORD    MajorImageVersion;
+    WORD    MinorImageVersion;
+    WORD    MajorSubsystemVersion;
+    WORD    MinorSubsystemVersion;
+    DWORD   Win32VersionValue;
+    DWORD   SizeOfImage;
+    DWORD   SizeOfHeaders;
+    DWORD   CheckSum;
+    WORD    Subsystem;
+    WORD    DllCharacteristics;
+    DWORD   SizeOfStackReserve;
+    DWORD   SizeOfStackCommit;
+    DWORD   SizeOfHeapReserve;
+    DWORD   SizeOfHeapCommit;
+    DWORD   LoaderFlags;
+    DWORD   NumberOfRvaAndSizes;
+    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+} IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;
+
+//Linux COFF from coff.h
+typedef struct 
+{
+  char  magic[2];       // type of file              
+  char  vstamp[2];      // version stamp             
+  char  tsize[4];       // text size in bytes, padded to FW bdry通过填充字节对齐到字边界
+  char  dsize[4];       // 初始化数据区的大小
+  char  bsize[4];       // 未初始化数据区的大小
+  char  entry[4];       // 可执行程序的入口地址，实际上是文件偏移量
+  char  text_start[4];  /* base of text used for this file       */
+  char  data_start[4];  /* base of data used for this file       */
+}
+COFF_AOUTHDR;
+```
+
+### 2.3 COFF区域头
+
+区域头位于可选头信息的后面，**COFF**文件可以包含多个区域头。
+
+```c
+//Section header format from winnt.h
+#define IMAGE_SIZEOF_SHORT_NAME              8
+typedef struct _IMAGE_SECTION_HEADER {
+    BYTE    Name[IMAGE_SIZEOF_SHORT_NAME];
+    union {
+            DWORD   PhysicalAddress;
+            DWORD   VirtualSize;
+    } Misc;
+    DWORD   VirtualAddress;
+    DWORD   SizeOfRawData;
+    DWORD   PointerToRawData;
+    DWORD   PointerToRelocations;
+    DWORD   PointerToLinenumbers;
+    WORD    NumberOfRelocations;
+    WORD    NumberOfLinenumbers;
+    DWORD   Characteristics;
+} IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
+
+//Section header format from coff.h
+struct COFF_scnhdr {
+  char      s_name[8];      // section name             
+  char      s_paddr[4];     // physical address, aliased s_nlib 
+  char      s_vaddr[4];     // virtual address          
+  char      s_size[4];      // section size             
+  char      s_scnptr[4];    // file ptr to raw data for section 
+  char      s_relptr[4];    // file ptr to relocation       
+  char      s_lnnoptr[4];   // file ptr to line numbers     
+  char      s_nreloc[2];    // number of relocation entries     
+  char      s_nlnno[2];     // number of line number entries    
+  char      s_flags[4];     // flags                
+};
+```
+
+- 区域名
+
+    说明区域的名称，一般限制为*8*个字符，多则截取为*8*个字符，少则补充零终结字节。
+    该字段的值往往是**.text**、**CODE**、**.data**之类的字符串，但名字并非定义段的类型，真正决定区域类型的是**s_flags**及**Characteristics**字段。
+
+- 虚拟内存地址
+    
+    **VirtualAddress**及**s_vaddr**说明该区域调入内存后的地址。
+    这是运行时期的内存地址，并非文件内的偏移量。程序调入器根据该值确定该区域放到内存的何处。
+
+### 2.4 COFF区域
+
+区域头提供了描述目标文件中实际数据和代码的目录。
+**s_scnptr**及**PointerToRawData**字段包含了原始二进制数据或代码在文件中的偏移量，而**s_size**和**SizeOfRawData**字段则指定了该区域数据的长度。
+
+- 区域块中的数据与操作系统调入内存的数据可能并不完全一致，因为区域中许多指令操作数地址和指针值都可能基于操作系统的调入位置**修正**。
+- 与区域数据隔开的重定位列表存放着区域内的偏移值，操作系统必须据此对区域的重定位地址加以修正。
+- 修正是在操作系统在将区域数据从磁盘调入内存时进行的。
+
+### 2.5 重定位区域
+
+**COFF**的重定位区域存放着特定的**COFF**区域内指针的偏移量，在系统将这些区域内的代码或数据调入内存时，必须要对其重定位。
+
+### 2.6 调试与符号信息
+
+- 调试程序利用行号信息将源代码行与可执行的机器代码指令对照起来
+- 符号表区域和字符串表区域存放着**COFF**文件的公用以及外部符号，链接器以此信息来在目标模块间解析外部引用；调试程序则用其在调试期间显示符号变量和函数名

@@ -1,0 +1,48 @@
+title: 反引号
+date: 2017-01-05 16:54:43
+updated: 2017-01-05 17:03:02
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Special Symbol
+---
+## 1 反引号**`**
+
+在美式键盘上，反引号和波浪线**~**位于同一键位。
+
+反引号**`**允许将**shell**命令的输出赋给变量，用法是用反引号把整个命令圈起来：
+
+```sh
+test=`date`
+echo "The time is : $test"
+```
+
+**shell**会运行反引号中的命令，并将其输出赋给变量**test**，运行脚本后将有如下输出：
+![](../post_img/586e09cdab6441236e004750)
+
+## 2 常见用法
+
+一个常见的用法是在脚本中通过反引号获得当前日期并用它来生成唯一文件名：
+
+```sh
+#!/bin/bash
+# copy the /usr/bin directory listing to a log file
+today=`date +%y%m%d`
+ls /usr/bin -al > log.$today
+```
+
+**today**变量被赋予格式化后的**date**命令的输出。
+**+%y%m%d**格式告诉**date**命令将日期显示为两位数的年、月、日的组合：
+
+![](../post_img/586e09ebab6441236e004755)
+
+如上的命令输出代表此时是<font color=red>16年5月30日</font>。
+
+运行脚本后将出现如下一个新的文件，后缀可能不一样，因为时间不一样。
+![](../post_img/586e09f3ab6441209e004870)

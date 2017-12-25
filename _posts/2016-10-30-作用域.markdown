@@ -1,0 +1,40 @@
+title: 作用域
+date: 2016-10-30 13:29:47
+updated: 2017-02-21 15:02:05
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+---
+
+## 1 嵌套的作用域
+
+作用域能彼此包含，被包含(或者说被嵌套)的作用域称为**内层作用域(inner scope)**，包含着其他作用域的作用被被称为**外层作用域(outer scope)**。
+
+- 作用域中一旦声明了某个名字，他所嵌套着的所用作用域中都能访问该名字
+- 同时，允许在内层作用域中重新定义外层作用域已有的名字，此时访问该名字时会覆盖外层作用域定义的名字
+
+## 2 访问全局变量
+
+当内层作用域与全局作用域有着同样名字的变量时，此时可以用**作用域操作符**来覆盖默认的作用域规则，请求获取作用域操作符右侧名字对应的变量。
+
+- 例子
+
+   ```cpp
+   #include <iostream>
+   int reused = 0; //reused拥有全局作用域
+   int main(void)
+   {
+       int reused = 1;
+       cout << "inner scope " << reused << endl;
+       cout << "outter scope " << ::reused << endl;//全局作用域本身没有名字，所以作用域左侧为空
+       system("pause");
+       return 0;
+   }
+   ```
+- 执行结果
+    
+ ![](../post_img/58158fabab644164d40040b7)

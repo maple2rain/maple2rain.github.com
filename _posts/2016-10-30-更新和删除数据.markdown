@@ -1,0 +1,107 @@
+title: 更新和删除数据
+date: 2016-10-30 09:32:46
+updated: 2017-02-21 15:16:19
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+## 1 更新数据
+
+为了更新表中的数据，可使用**UPDATE**语句。可采用两种方式使用**UPDATE**：
+
+- 更新表中特定行
+- 更新表中所有行
+
+### 1.1 UPDATE语句组成
+
+- 要更新的表
+- 列名和他们的新值
+- 确定要更新行的过滤条件
+
+### 1.2 例子
+
+```SQL
+UPDATE productnotes
+SET 
+    prodID = '5'
+    nodeText = 'comment'
+WHERE nodeID = 5;#设置将nodeID为5的prodID设置为5
+```
+
+**UPDATE**语句总是以要更新的表的名字开始，以**WHERE**子句结束。
+当需要设置多个列时，只需使用单个**SET**命令，每个**列=值**对之间以**逗号**分隔开。
+
+### 1.3 IGNORE关键字
+
+如果用UPDATE语句更新多行，并且在更新这些行中的一行或多行时出一个现错误，则整个UPDATE操作被取消（错误发生前更新的所有行被恢复到它们原来的值）。为即使是发生错误，也继续进行更新，可使用IGNORE关键字，如：
+
+```SQL
+UPDATE IGNORE Table
+...
+```
+
+### 1.4 删除某个列的值
+
+为了删除某个列，可设置其值为NULL(当其表定义为允许NULL值是可用)。
+
+### 1.5 case结构
+
+利用**case**结构可以在一条**update**语句执行不同条件的更新。
+
+```SQL
+UPDATE productnotes
+SET
+    nodeText = case
+                    when noteID > 5 then 'more than 5'
+                    else 'less  than or equal to 5'
+               end
+```
+
+case语句的一般格式如下：
+```SQL
+case
+    when condition1 then result1
+    when condition2 then result2
+    ...
+    when conditionn then resultn
+    else retult0
+end
+```
+这个操作返回值resulti。并且其可以出现在任何期待出现值的地方。
+
+## 2 删除数据
+
+为了从一个表中删除数据，可使用**DELETE**语句。可采用两种方式使用**DELETE**：
+
+- 从表中删除特定的行
+- 从表中删除所有的行
+
+### 2.1 例子
+
+```SQL
+DELETE FROM productnotes
+WHERE nodeID = 5;#设置将nodeID为5行删除
+```
+
+### 2.2 更快地删除
+
+如果想从表中删除所有行，不要使用**DELETE**。可使用**TRUNCATE TABLE**语句，它完成相同的工作，但速度更快（**TRUNCATE**实际是删除原来的表并重新创建一个表，而不是逐行删除表中的数据）。
+
+## 3 更新和删除的指导原则
+
+如果省略了WHERE子句，则UPDATE或DELETE将被应用到表中所有的行。
+换句话说，如果执行UPDATE而不带WHERE子句，则表中每个行都将用新值更新。
+类似地，如果执行DELETE语句而不带WHERE子句，表的所有数据都将被删除。
+
+### 3.1 良好习惯
+
+- 除非确实打算更新和删除每一行，否则绝对不要使用不带**WHERE**子句的**UPDATE**或**DELETE**语句。 
+- 保证每个表都有主键，尽可能像WHERE子句那样使用它（可以指定各主键、多个值或值的范围）。 
+- 在对**UPDATE**或**DELETE**语句使用**WHERE**子句前，应该先用**SELECT**进行测试，保证它过滤的是正确的记录，以防编写的WHERE子句不正确。 
+- 使用强制实施引用完整性的数据库，这样**MySQL**将不允许删除具有与其他表相关联的数据的行。 
+
+
+
+

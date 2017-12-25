@@ -1,0 +1,56 @@
+title: 捕捉信号
+date: 2017-01-05 16:59:33
+updated: 2017-01-05 17:03:22
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- User Input
+---
+## 1 trap捕捉信号
+
+使用**trap**命令可以指定脚本要观察哪些**Linux**信号并从**shell**中拦截。
+如果脚本收到了**trap**命令列出的信号，它会阻止他被**shell**处理，而在本地处理它。
+
+### 1.1 命令格式
+
+```sh
+trap commands signals
+```
+
+当捕捉到**signals**时，**trap**会以**commands**来代替执行。
+
+```sh
+trap "echo 'I have trapped Ctrl-C'" SIGINT SIGTERM
+```
+
+上述例子会在每次检测到**SIGINT**或**SIGTERM**信号时显示一条简单的文本信息，并阻止用户使用**Ctrl-C**命令来终止程序。
+
+## 2 捕捉脚本的退出
+
+在脚本完成命令之后，可以捕捉到脚本结束的信号：
+
+```sh
+trap "echo It's end" EXIT
+```
+
+**EXIT**信号表示脚本退出，此时**shell**将会执行**trap**中的命令，如上例中的输出**It's end**。
+
+## 3 移除捕捉
+
+可以使用**-**来移除一组信号被捕捉，将其恢复到正常状态：
+
+```sh
+trap "echo It's end" EXIT
+...
+trap - EXIT
+...
+```
+
+上述例子中，将会在第三句命令处移除信号捕捉，此时如果脚本正常终止，那么将不会输出**It's end**；
+但如果在脚本还没执行到第三句就被外部终止了，则仍会执行输出。

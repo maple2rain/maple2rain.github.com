@@ -1,0 +1,60 @@
+title: 比例变址寻址
+date: 2016-10-30 13:39:49
+updated: 2017-02-21 16:11:41
+tags:
+- ADR
+categories:
+- Study
+- Computer
+- PL
+- Asm
+- 80x86
+- LocateMode
+---
+
+## 1 比例变址寻址与变址寻址
+
+比例变址寻址与变址寻址类似，只有两点区别。
+比例变址寻址还允许：
+
+- 将两个寄存器值相加，外加一个偏移量
+- 可将变址寄存器的值乘以比例因子1、2、4或8
+
+## 2 HLA
+
+```asm
+mov(eax, VarName[ebx + esi*4]); //将ebx加上4倍的esi值来作为偏移
+```
+
+其还允许操作数多种变形。
+
+```asm
+VarName[IndexReg * scale]
+VarName[BaseReg + IndexReg * scale]
+VarName[BaseReg + IndexReg * scale + displacement]
+[BaseReg + IndexReg * scale + displacement]
+```
+
+## 3 MASM和TASM
+
+**MASM**和**TASM**在寄存器间接寻址模式的语法与**HLA**基本一样，只不过操作数的顺序需要颠倒。
+
+## 4 Gas
+
+**Gas**则以圆括号括住寄存器名。
+**Gas**使用3个操作数的语法来指定**基址寄存器、变址寄存器和比例值**。
+**Gas**的一般语法为：
+
+```asm
+expression(BaseReg, IndexReg, scale)
+```
+
+具体操作数形式如下：
+
+```asm
+VarName(, IndexReg, scale)
+VarName + displacement(, IndexReg, scale)
+(BaseReg, IndexReg, scale)
+VarName(BaseReg, IndexReg, scale)
+VarName + displacement(BaseReg, IndexReg, scale)
+```

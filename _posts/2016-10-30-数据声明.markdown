@@ -1,0 +1,117 @@
+title: 数据声明
+date: 2016-10-30 13:38:57
+updated: 2017-02-21 16:18:04
+tags:
+- 80x86
+categories:
+- Study
+- Computer
+- PL
+- Asm
+- 80x86
+---
+
+## 1 底层数据类型
+
+80x86只提供几种底层的数据类型，供各机器指令操作。
+
+- 字节**byte**，存放8位数值
+- 字**word**，存放16位数值
+- 双字**double word, dword**，存放32位数值
+- 32位实数**real32 object, real4 object**，存放32位单精度浮点数
+- 64位实数**real64 object, real8 object**，存放64位单精度浮点数
+
+- 注意
+
+    80x86汇编器一般都支持十字节(**TByte**)和80位实数(**Real80/Real10**)，但大部分高级语言编译器并不使用它们。
+    不过，个别C/C++编译器以**long double**数据类型来支持**Real80**的数值。
+
+## 2 HLA的字节数据声明
+
+在**HLA**的**static**部分可以如下声明变量：
+
+```asm
+static
+    variableName : byte;                //声明一个8位变量
+    blockOfBytes : byte[sizeOfBlock];   //声明8位数组
+```
+
+这些**HLA**声明将创建**未初始化**变量，此时**HLA**会隐式将**static**变量初始化为0。
+也可以显示初始化为其他值，如：
+
+```asm
+static
+    InitializedByte  : byte    := 5;                //初始值为5
+    InitializedArray : byte[4] := [1,2,3,4];    //初始数组元素值为1,2,3,4
+```
+
+## 3 MASM和TASM的字节数据声明
+
+**MASM**和**TASM**一般在**.data**节中用*db*或*byte*指示性语句，来为字节或字节变量数组分配存储空间。
+
+```asm
+//声明单个未初始化字节的变量
+variableName db ?
+variableName byte ?
+
+//声明一个为初始化字节块的变量
+variableName db sizeOfBlock dup (?)
+variableName byte sizeOfBlock dup (?)
+
+//创建初始值非零的变量
+InitializedByte     db    5
+InitializedByte2    byte  5
+InitializedArray0   db    4    dup   (5)     ;数组元素个数为4，值都为5
+InitializedArray1   db    5    dup   (5)     ;数组元素个数为5，值都为5
+
+InitializedArray3   db    0,1,2,3           ;数组元素为4个，值为0,1,2,3
+InitializedArray4   byte  4,5,6,7           ;数组元素为4个，值为4,5,6,7
+```
+
+## 4 Gas的字节数据声明
+
+**Gas**一般在**.data**节中使用*.byte*指示性语句，来为字节或字节变量数组分配存储空间。
+
+```asm
+variableName: .byte 0
+```
+
+**Gas**不提供显示形式来创建未初始化的变量，如果需要创建这种变量，应对后者设置操作数为0。
+
+```asm
+variableName:    .byte 0      //创建未初始化变量
+InitializedByte: .byte    5   //初始化变量为0
+ZeriedByte       .byte    0   //赋值为0
+
+//创建未初始化数组
+variableName:
+        .rept   sizeOfBlock
+        .byte   0
+        .endr
+
+//所创建的数组元素个数为4，值都为5
+InitializedArray0:
+        .rept   4
+        .byte   5
+        .endr
+
+//所创建的数组元素个数为4，值为0,1,2,3
+InitializedArray1:
+        .byte   0,1,2,3
+```
+
+## 5 16位和32位数据声明
+
+对于16位变量：
+
+- **HLA**使用*word*数据类型
+- **MASM**和**TASM**使用*dw*或*word*指示性语句
+- **Gas**使用*.int*指示性语句
+
+对于32位变量
+
+- **HLA**使用*dword*数据类型
+- **MASM**和**TASM**使用*dd*或*dword*指示性语句
+- **Gas**使用*.long*指示性语句
+
+用法与字节变量的声明没有区别。

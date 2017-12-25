@@ -1,0 +1,98 @@
+title: 屏幕输出
+date: 2017-01-05 16:23:38
+updated: 2017-01-05 16:30:21
+tags:
+- Linux Terminal
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Terminal
+---
+
+
+## 1 屏幕输出
+
+所有的**curses**程序必须以**initscr**开始，以**endwin**函数结束。
+
+- 头文件定义
+
+    ```c
+    #include <curses.h>
+    WINDOW *initscr(void);  //成功返回指向stdscr结构的指针，失败则输出诊断错误信息并使程序退出
+
+    int endwin(void);   //成功时返回OK，否则返回ERR；可以在使用该函数退出curses后调用clearos(stdscr, 1)和refresh函数继续curses操作
+    ```
+
+### 1.1 输出到屏幕
+
+- 基本API
+
+    |                                  原型                                  |                             说明                             |
+    |------------------------------------------------------------------------|--------------------------------------------------------------|
+    | int addch(const chtype char_to_add)                                    | 在指定位置添加字符                                           |
+    | int addchstr(chtype *const string_to_add)                              | 在指定位置添加字符串                                         |
+    | int printw(char *format, ...)                                          | 采用与printf同样的字符串格式化方式，将其添加到指定的光标位置 |
+    | int refresh(void)                                                      | 刷新屏幕，成功返回OK，失败返回ERR                            |
+    | int box(WINDOW *win_ptr, chtype vertical_char, chtype horizontal_char) | 围绕一个窗口绘制方框                                         |
+    | int insch(chtype char_to_insert)                                       | 插入一个字符，将已有字符右移                                 |
+    | int insertln(void)                                                     | 插入空行，将现有行依次下移                                   |
+    | int delch(void)                                                        | 删除一个字符，已有字符左移                                   |
+    | int deleteln(void)                                                     | 删除一行，将现有行上移                                       |
+    | int beep(void)                                                         | 产生蜂鸣，并闪烁屏幕                                         |
+    | int flash(void)                                                        | 闪烁屏幕                                                     |
+
+- 说明    
+
+    **curses**有其自己的字符类型**chtype**，实际上是**unsigned long**类型的一个**typedef**类型定义。
+
+# 2 屏幕读取
+
+从屏幕上读取字符并不常用，但有时候还是可以用的。
+
+### 2.1 从屏幕读取
+
+- 基本API
+
+    |                        原型                        |                说明                |
+    |----------------------------------------------------|------------------------------------|
+    | chtype inch(void)                                  | 返回光标当前位置的字符及其属性信息 |
+    | int instr(char *string)                            | 将返回内容写到字符数组中           |
+    | int innstr(char *string, int number_of_characters) | 将返回内容写到字符数组中           |
+
+# 3 清除屏幕
+
+- 基本API
+    
+    |        原型        |                                                 说明                                                |
+    |--------------------|-----------------------------------------------------------------------------------------------------|
+    | int erase(void)    | 在每个屏幕位置写上空白字符                                                                          |
+    | int clear(void)    | 与erase类似，但同时调用clearok函数，后者会强制执行清屏操作，并且在下次调用refresh函数时重现屏幕原文 |
+    | int clrtobot(void) | 清除当前光标位置直到屏幕结尾的所有内容                                                              |
+    | int clrtoeol(void) | 清除当前光标位置直到光标所处行行尾的所有内容                                                        |
+
+# 4 移动光标
+
+- 基本API
+
+    |                       原型                       |                                                     说明                                                    |
+    |--------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+    | int move(int new_y, int new_x)                   | 指定逻辑光标位置，左上角为(0, 0)，最大上限分别为LINES和COLUMNS                                              |
+    | int leaveok(WINDOW *window_ptr, bool leave_flag) | 设置一个标志，是硬件光标在屏幕刷新后停留在逻辑光标处，此时标志位false；若为true则在刷新后被放在屏幕任意位置 |
+
+# 5 字符属性
+
+每个**curses**字符都可以有一些属性用于控制该字符在屏幕上的显示方式，前提是用于显示的硬件设备支持要求的属性
+预定义的属性有：**A_BLINK, A_BOLD, A_ITALIC, ADIM, A_REVERSE, A_STANDOUT, A_UNDERLINE**。
+
+- 基本API
+
+    |              原型             |                          说明                         |
+    |-------------------------------|-------------------------------------------------------|
+    | int attron(chtype attrubute)  | 在不影响其他属性的前提下启用其他属性                  |
+    | int attroff(chtype attribute) | 在不影响其他属性的前提下关闭其他属性                  |
+    | int attrset(chtype attribute) | 设置curses属性                                        |
+    | int standout(void)            | 强调模式，大多数为反白显示                            |
+    | int standend(void)            | 强调模式，大多数为反白显示(在linuxmint下好像没什么用) |

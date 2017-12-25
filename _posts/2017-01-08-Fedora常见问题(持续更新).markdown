@@ -1,0 +1,762 @@
+title: Fedora常见问题(持续更新)
+date: 2017-01-08 12:38:17
+updated: 2017-07-10 00:00:49
+tags:
+- ComProblem
+categories:
+- Study
+- Computer
+- Tools
+---
+# 配置软件源
+
+配置软件源是为了提升软件下载及更新速度，一般在国内可以选择配置阿里云软件源。
+
+1. 备份
+
+    ```sh
+    $ sudo mv /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora.repo.backup    
+$ sudo mv /etc/yum.repos.d/fedora-updates.repo /etc/yum.repos.d/fedora-updates.repo.backup
+    ```
+
+2. 下载软件源
+
+    ```sh
+    $ sudo wget -O /etc/yum.repos.d/fedora.repo http://mirrors.aliyun.com/repo/fedora.repo
+$ sudo wget -O /etc/yum.repos.d/fedora-updates.repo http://mirrors.aliyun.com/repo/fedora-updates.repo
+    ```
+
+3. 配置中文社区源
+
+    ```sh
+    dnf config-manager --add-repo=http://repo.fdzh.org/FZUG/FZUG.repo
+    ```
+
+4. 配置rpmfusion源
+
+    ```sh
+    $ sudo su -c 'dnf install --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm'
+    ```
+
+5. 配置Google源
+
+    ```sh
+    $ sudo wget https://repo.fdzh.org/chrome/google-chrome-mirrors.repo -P /etc/yum.repos.d/
+    ```
+
+
+
+6. 生成缓存
+    
+    ```sh
+    $ sudo dnf makecache
+    ```
+ 
+  
+- Reference
+    [1] [fedora软件源配置 阿里云软件源配置](http://www.kyos8.com/thread-33-1-1.html)
+    [2] [添加FZUG源](https://github.com/FZUG/repo/wiki/%E6%B7%BB%E5%8A%A0-FZUG-%E6%BA%90)
+    [3] [添加rpmfusion源](https://kissbug8720.gitbooks.io/fedora22-settings/content/chapter2.html)
+    [4] [安装chrome](http://www.kyos8.com/thread-33-1-1.html)
+    
+
+----------
+
+# 安装软件
+
+## 网易云音乐
+
+身为音乐狂热者怎可不安装网易云音乐？
+
+```sh
+$ sudo dnf install netease-cloud-music
+```
+
+## 本地音乐播放器DeadBeef
+
+即使有了网易云，但有时没有网时还是想要听听音乐，这时，你可以选择下载到本地使用网易云或`ffplay`播放，但如果想使用均衡器，则可以使用**DeadBeef**。
+
+```sh
+$ sudo dnf install deadbeef
+```
+
+可以手工调置均衡器，如直接对播放器底部的分贝条进行拖动或点击修改，也可以导入[foobar preset](https://pan.baidu.com/s/1bp0AfBD)，在`Presets`按钮中选择`Import Foobar2000 preset`，再选择相应的`.feq`文件。
+![](../post_img/5926ef99ab644162640021a5)
+
+## 图片浏览comix
+
+`comix`整体外观合眼，很适合看漫画的同学。
+
+```sh
+$ sudo dnf install comix
+```
+
+## 多线程下载器flareget
+
+在Windows下，有一个下载神器[IDM](https://www.internetdownloadmanager.com/)，其可以进行多线程下载。而在Linux下，其兄弟则为[flareget](https://flareget.com/)。
+
+```sh
+$ sudo dnf install flareget
+```
+
+----------
+
+
+# 出现GPG key错误
+
+在安装软件包时，如果出现GPG key 校验错误，可直接忽略该校验器，如安装vim，示例如下：
+
+```bash
+$ sudo dnf install vim --nogpgcheck
+```
+
+----------
+
+
+# 安装wine qq
+
+遇到输入法无法输入时，关闭ibus模块
+```sh
+$ gsettings set org.gnome.settings-daemon.plugins.keyboard active false 
+```
+
+----------
+
+
+# 更新grub2过程 {#jmp2grub2}
+
+执行命令
+```sh
+$ sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+```
+用grub2-mkconfig命令可以生成新的配置文件，里面包含能找到的磁盘上的所有系统引导记录。
+
+----------
+
+
+# NTFS盘无法挂载
+
+错误提示为
+
+```sh
+The NTFS partition is in an unsafe state. Please resume andshutdown
+Windows fully (no hibernation or fast restarting), or mount thevolume
+read-only with the 'ro' mount option.
+```
+
+输入以下命令查看挂载盘
+
+```sh
+$ sudo fdisk -l
+```
+
+显示挂载盘后，输入修复命令
+
+```sh
+$ sudo ntfsfix MountPoint
+# MountPoint such as /dev/sdb1
+```
+即可修复。
+
+----------
+
+
+# 安装deb包软件
+
+实际上，Fedora并不能直接安装deb包，而是要通过一个工具`alien`将其转换为`rpm`包后才能继续下一步操作。
+所以操作可如下
+
+```sh
+$ sudo dnf install alien
+$ alien -r *.deb
+$ rpm -ivh *.rpm
+```
+
+----------
+
+
+# rpm conflicts with file from package
+
+进行`rpm`包下载时，有时会出现如题所示冲突问题，此时有两种解决方案
+
+1. 卸载掉冲突的文件，安装新的文件。如果由于由于依赖关系导致要卸载很多软件，那可以优先考虑下一个方法。
+2. 安装的时候增加–replacefiles参数，例如 `rpm -ivh xxx.rpm --replacefiles`。
+
+----------
+
+
+# 配置VIM
+
+在使用vim时，肯定要对vim进行配置，以下是Github上star及fork数目很高的方案：
+[amix](https://github.com/amix/vimrc), [dot](https://github.com/humiaozuzu/dot-vimrc), [spf13](https://github.com/spf13/spf13-vim).
+而我现在使用的是第三个，其安装命令如下
+
+```sh
+$ curl https://j.mp/spf13-vim3 -L > spf13-vim.sh && sh spf13-vim.sh
+```
+耐心等待安装即可。
+
+----------
+
+
+# 设置开机启动脚本
+
+- 新建文件`/etc/rc.d/rc.local`(已有则在后面补充内容)
+- 编辑执行脚本内容(最好是把各项任务放置在各个脚本中，然后在rc.local中调用这些脚本)
+- 赋予该文件可执行权限
+
+```sh
+$ chmod +x /etc/rc.d/rc.local
+```
+
+- 在文件`/usr/lib/systemd/system/rc-local.service`最后添加以下内容
+
+```sh
+[Install]
+WantedBy=multi-user.target
+```
+
+- 执行命令启动该服务
+
+```sh
+$ sudo systemctl enable rc-local.service
+```
+
+----------
+
+
+# 配置迅雷下载
+
+为了在Linux下实现迅雷下载(包括种子和迅雷链接)，可以安装[迅雷服务](https://pan.baidu.com/s/1gfOIUSb)。下载文件解压后，在终端运行程序`portal`，即可自动进行配置，尔后生成设备绑定激活码`active code`，将其复制并登录[迅雷远程下载官网](http://yuancheng.xunlei.com/)，输入该激活码绑定设备即可。
+
+----------
+
+
+# 开机过慢
+
+本来linux的开机应该是比windows要快才对的，然而却遇到开机越来越慢的问题。这时候，可以查看开机启动项，查看各开机项的启动时间。
+
+```sh
+#查看开机时间
+$ systemd-analyze
+
+#查看启动项
+$ systemd-analyze blame
+```
+
+![](../post_img/58ad8434ab6441067b005c69)
+
+使用`man`可以查看对应服务的说明，对于不想启动的启动项，可以禁止，如下禁止第一个服务：
+
+```
+$ sudo systemctl mask plymouth-quit-wait.service
+```
+
+如果产生了你不希望出现的结果，你可以使用：
+
+```sh
+$ sudo systemctl unmask plymouth-quit-wait.service
+```
+来撤销之前的操作。
+然而比较尴尬的是，即使关闭了上述启动项(开机动画)，仍然是会有开机动画出现，因而，可以选择将开机动画转化为文本模式，如下操作：
+
+```sh
+# 查看开机动画主题
+$ sudo plymouth-set-default-theme --list 
+
+# 设置开机动画主题为文本
+$ sudo plymouth-set-default-theme text
+
+# 更新开机动画选项
+$ sudo /usr/libexec/plymouth/plymouth-update-initrd
+```
+
+更进一步操作，可以修改`/etc/default/grub`文件，将其中的`rhgb`(redhat graphics boot)删除，关闭图片显示  启动信息，再执行[更新grub2操作](#jmp2grub2)即可。
+
+- 补充
+
+    一个比较尴尬的是，对于Fedora，当关闭了开机动画时，会导致一个bug，致使开机时间延长。不清楚该bug原由，但一个解决方法是首先删除`/var/log/journal/`目录下的文件，并将其更名为`/var/log/journal.org/`即可解决该问题，但不知更名为其他有无效果，有兴趣可以试一下。
+
+----------
+
+
+# 中文txt文档乱码
+
+在Window平台下，文档默认编码是GBK，而在Linux平台下默认的是UTF-8（中文环境的情况），编码的不同导致了原来文档中的中文变成了乱码。
+
+解决办法：
+使用iconv命令将文档的编码进行转换即可。
+如文档名为`test.txt`，将其输出到`newtest.txt`：
+
+```sh
+$ iconv -f gbk -t utf8 test.txt -o newtest.txt
+```
+
+----------
+
+
+# 挂起系统
+
+鼠标点击右上角，按住`Alt`键，界面中的`关机按钮`就会变成`挂起按钮`。
+
+----------
+
+
+# vmware相关事宜
+
+**安装**
+
++ [下载地址](http://www.vmware.com/cn/products/workstation/workstation-evaluation.html)
+
++ 执行安装
+    - 为安装包添加可执行权限
+    - 执行安装包安装
++ 安装包序列号
+    - VY74R-2GG80-4848P-UWW7X-Q22Y8
+    - YC150-4QYDJ-M88NZ-AWQ59-QYKW0
++ 启动时安装必要组件失败，添加编译工具
+
+```sh
+$ sudo dnf groupinstall "Development tools"
+$ sudo dnf install kernel-headers kernel-devel  
+```
+    
++ [更多信息](http://www.tecmint.com/install-vmware-workstation-in-linux/)
+
+**卸载**
+
+- 查看安装的虚拟机
+
+```sh
+$ vmware-installer -l
+```
+显示版本和产品名称，如
+Product Name           Product Version     
+====================== ====================
+vmware-workstation     7.0.1.227600 
+
+- 卸载虚拟机
+
+```sh
+$ sudo vmware-installer --uninstall-product vmware-workstation
+```
+
+- Reference
+
+    [1] [fedora 24 安装 vmware12](http://blog.csdn.net/Elekelly/article/details/52727426)
+    [2] [How to Install VMware Workstation 12 on Linux Systems](https://www.tecmint.com/install-vmware-workstation-in-Linux/)
+
+----------
+
+
+# 安装ibus输入法
+
+- 安装ibus框架
+
+```sh
+$ sudo dnf install ibus
+```
+
+- 安装拼音引擎
+
+```sh
+$ sudo dnf install ibus-libpinyin
+```
+
+- 设置ibus框架
+
+```sh
+$ ibus-setup
+```
+- 找回消失的ibus图标(启动后台进程)
+
+```sh
+$ ibus-daemon -drx
+```
+
+----------
+
+
+# 局域网主机互传文件
+
+对于`Linux`主机，互传文件的方式可以使用`scp`命令，但首先需要安装`ssh`(默认安装)及`openssh-server`。
+
+安装命令如下：
+
+```sh
+$ sudo dnf install ssh
+$ sudo dnf install openssh-server
+```
+
+启动服务：
+
+```sh
+$ sudo systemctl start sshd
+```
+
+**SCP命令**
+
+设有两机，均为局域网，两机可相互通信无问题(可ping通)。
+    两机IP分别为：
+        `A : 192.168.3.13 `，`B : 192.168.3.80`
+    假设A，B机的SSH都允许root登录。
+    
+设要把 A 上的 `/root/abc` 传到 B机并放到`/abc`目录，可以在A机上用命令
+```sh
+$ scp /root/abc root@192.168.3.80:/abc/
+```
+    
+若 SSH端口不是默认的22，比如，是端口1234 则加-P参数：
+```sh
+$ scp -P 1234 /root/abc root@192.168.3.80:/abc/
+```
+    
+也可以在B机上用命令：
+```sh
+$ scp root@192.168.3.13:/root/abc  /abc/
+```
+
+若出现
+```sh
+ssh: connect to host *:*:*:* port 22: Connection refused
+```
+
+造成这个错误的原因有可能是ssh-server未安装或者未启动，安装或启动服务即可。
+
+- Reference
+
+    [1] [在两台linux服务器间传递文件](http://blog.csdn.net/rudygao/article/details/13765973)
+    [2] [scp 跨机远程拷贝](http://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/scp.html)
+
+----------
+
+
+# 设置开机grub背景图片
+
+修改文件`/etc/default/grub`(这个文件将会作为`grub2-mkconfig`的输入源)，在文件末尾添加两行(先做好备份)：
+
+```sh
+GRUB_TERMINAL_OUTPUT="gfxterm"
+GRUB_BACKGROUND=/boot/grub2/themes/system/background.png
+```
+
+其中`GRUB_TERMINAL_OUTPUT`默认值为`console`，而`GRUB_BACKGROUND`则是指定的图片路径。
+修改保存后，再次进行[更新grub2操作](#jmp2grub2)即可。
+
+此外，还可以设置字体颜色，诸如选中高亮字体及普通字体等：
+
+```sh
+# 前景白后景黑
+export GRUB_COLOR_NORMAL="white/black"
+# 前景黄后景黑
+export GRUB_COLOR_HIGHLIGHT="yellow/black"
+```
+
+也可以下载主题，默认情况下使用的是主题*system*，位于**/boot/grub2/themes/**中。因此才可以将显示图片的路径设置为`GRUB_BACKGROUND=/boot/grub2/themes/system/background.png`，但是可以通过下载新的主题再修改主题文件**themes.txt**来完成主题的更改。
+如下载主题**starfield**，方法如下：
+
+```sh
+$ sudo dnf install grub2-starfield-theme
+```
+
+上述主题会被下载至**/usr/share/grub/themes/starfield**，所以需要将其移动至**/boot/grub2/themes/**目录下：
+
+```sh
+$ sudo cp -a /usr/share/grub/themes/starfield /boot/grub2/themes
+```
+
+然后，为了使用该主题，需要指定主题文件为**starfield**的主题文件，修改**/etc/default/grub**，添加如下一行：
+
+```sh
+GRUB_THEME="/boot/grub2/themes/starfield/theme.txt"
+```
+
+**theme.txt**内容如下：
+
+```sh
+# Default theme for GRUB2
+#
+# Copyright (C) 2011 Daniel Tschudi
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+#general settings
+message-font: "DejaVu Sans Regular 12"
+message-color: "#000" # 指定字体前景色
+message-bg-color: "#fff" # 指定字体背景色
+terminal-box: "terminal_box_*.png"
+terminal-font: "DejaVu Sans Regular 12" 
+desktop-image: "starfield.png" # 指定背景图片
+
+#help bar at the bottom
++ label {
+	top = 100%-25
+	left = 0
+	width = 100%
+	height = 20
+	text = "@KEYMAP_MIDDLE@"
+	align = "center"
+	font = "DejaVu Sans Regular 10"
+	color = "#FFF"
+}
+
+#boot menu
++ boot_menu {
+	left = 10%
+	width = 80%
+	top = 20%
+	height = 50%	
+	item_font = "DejaVu Sans Regular 12"
+	item_color = "#000"
+	selected_item_font = "DejaVu Sans Bold 14"
+	selected_item_color= "#000"
+	selected_item_pixmap_style = "blob_*.png"
+	icon_height = 25
+	icon_width = 25
+	item_height = 26
+	item_padding = 0
+	item_icon_space = 0
+	item_spacing = 1
+	scrollbar = true
+	scrollbar_width = 20
+	scrollbar_thumb = "slider_*.png"
+	menu_pixmap_style = "boot_menu_*.png"
+}
+
+#progress bar
++ progress_bar {
+	id = "__timeout__"
+	left = 15%
+	top = 80%
+	height = 20
+	width = 70%
+	font = "DejaVu Sans Regular 12"
+	text_color = "#000"
+	fg_color = "#fff"
+	bg_color = "#6ac"
+	border_color = "#fff"
+	text = "@TIMEOUT_NOTIFICATION_LONG@"
+}
+```
+
+同样可以对**theme.txt**进行修改，调配自己的喜好。
+修改保存后，再次进行[更新grub2操作](#jmp2grub2)即可：
+
+```sh
+$ sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+```
+
+- Reference
+
+    [1] [Grub2 Displays](https://help.ubuntu.com/community/Grub2/Displays)
+    [2] [Grub Background Picture](http://forums.fedoraforum.org/showthread.php?t=305790)
+
+----------
+
+
+# VBox 移动vdi文件后无法打开
+
+有时候会遇到在移动已创建的`VDI`磁盘之后便无法打开它，原因是VBox为其添加了`UUID`，仅能在某一目录下打开。为解决这个问题，可以该磁盘修改`UUID`，方法如下：
+
+```sh
+$ VBoxManage internalcommands sethduuid *.vdi
+```
+
+如此便可将`*.vdi`的`UUID`进行更换了。
+
+- Reference
+
+    [1] [How to change UUID in virtual box](https://stackoverflow.com/questions/17803331/how-to-change-uuid-in-virtual-box)
+
+----------
+
+
+# 设置shell选项
+
+为了查看可以配置的shell选项，可以执行下述命令：
+
+```sh
+$ set -o
+```
+
+这将显示所有的shell选项，并说明他们是`on`还是`off`。
+
+为了设置某个选项，可以进行如下命令，如设置shell为vi模式并关闭emacs模式
+
+```sh
+$ set +o emacs
+$ set -o vi
+```
+
+如此设置之后，便可以在shell中使用vi模式进行终端的操作了。当然，为了永久生效，还是要将其写入`.bashrc`文件。
+
+- Reference
+
+    [1] Haeley Hahn. Unix & Linux 大学教程[M]. 张杰良, 译. 北京:清华大学出版社, 2010.1:241-244.
+
+----------
+
+
+# 常用Gnome Shell Extension
+
+- Analog clock(添加模拟时钟到屏幕顶端)
+- Application menu(应用菜单)
+- Clipboard indicator(剪切板历史记录)
+- Dynamic top bar(动态显示顶端栏，可调节透明度)
+- Launch new instance(每次都加载一个新应用实例)
+- Media player indicator(音乐播放显示在顶端)
+- Openweather(天气预报)
+- Places status indicator(文件路径)
+- Recent items(最近使用的文件)
+- Redshift gnome(降低色温，护眼)
+- Dash to dock(底部dock)
+- Todo.txt(自定义任务列表)
+- Topicons(将左下角的图标放至顶端,高级版为Topicons plus)
+- User themes(主题)
+- Eye(跟踪鼠标的眼睛)
+
+- Reference
+
+    [1] [Gnome Extensions](https://extensions.gnome.org/)
+    
+----------
+
+
+# 清除缓存及释放swap空间
+
+Linux在启动程序后，会为其保留缓存，久而久之，当启动的程序多时，缓存将会占据大量内存，却没有被回收，而启动新程序时则有可能会从swap空间进行内存的分配。为了释放缓存，可以改写cache释放文件。其默认值为0,若改为3,则将释放缓存。方法如下：
+
+```sh
+# To free pagecache:
+$ sudo echo 1 > /proc/sys/vm/drop_caches
+# To free dentries and inodes:
+$ sudo echo 2 > /proc/sys/vm/drop_caches
+# To free pagecache, dentries and inodes:
+$ sudo echo 3 > /proc/sys/vm/drop_caches
+
+# 当出现无法修改错误时，使用下列方法
+$ echo 3 | sudo tee /proc/sys/vm/drop_caches
+```
+
+在重启计算机后，文件将会被修改为默认值0。
+
+而在使用了swap空间后，计算机可能会变得及其缓慢，所以可以在内存足够时将swap空间的数据放回内存，加快程序运行速度。执行脚本如下：
+
+```sh
+#!/bin/env bash
+
+free_data="$(free)"
+mem_data="$(echo "$free_data" | grep 'Mem:')"
+free_mem="$(echo "$mem_data" | awk '{print $4}')"
+buffers="$(echo "$mem_data" | awk '{print $6}')"
+
+# On Fedora, there is not cache but buffer/cache and available
+available="$(echo "$mem_data" | awk '{print $7}')"
+used_swap="$(echo "$free_data" | grep 'Swap:' | awk '{print $3}')"
+
+echo -e "Available memory:\t$available kB ($((available / 1024)) MB)"
+echo -e "Used swap:\t$used_swap kB ($((used_swap / 1024)) MB)"
+
+if [[ $used_swap -eq 0 ]]; then
+    echo "Congratulations! No swap is in use."
+elif [[ $used_swap -lt $available ]]; then
+    echo "Freeing swap..."
+    # need root permittion
+    swapoff -a
+    swapon -a
+else
+    echo "Not enough free memory. Exiting."
+    exit 1
+fi
+```
+
+- Reference
+
+    [1] [Linux内存分析与清理](http://www.jianshu.com/p/774551e6b3ba)
+    [2] [Setting /proc/sys/vm/drop_caches to clear cache](https://unix.stackexchange.com/questions/17936/setting-proc-sys-vm-drop-caches-to-clear-cache)
+
+----------
+
+# 改变默认文件管理器
+
+不知道各位用Gnome默认的文件管理器`nautilus`感觉如何，于我而言，还是要较多不适应，特别是文件管理风格及提示信息。
+然而，可以使用Cinnamon的默认文件管理器`nemo`。安装该软件十分简单，只需一条命令即可：
+
+```sh
+$ sudo dnf install nemo
+```
+
+为了将其设置为默认的文件管理器，并让其处理桌面图标，可以进行如下设置：
+
+```sh
+$ xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+$ gsettings set org.gnome.desktop.background show-desktop-icons false
+$ gsettings set org.nemo.desktop show-desktop-icons true
+```
+
+恢复原来的设置：
+
+```sh
+$ xdg-mime default nautilus.desktop inode/directory application/x-gnome-saved-search
+$ gsettings set org.nemo.desktop show-desktop-icons false
+$ gsettings set org.gnome.desktop.background show-desktop-icons true
+```
+
+- Reference
+    
+    [1] [Gnome3改变默认文件管理器](https://www.zhangguangtong.cn/?p=46)
+    [2] [Change default filemanager to nemo](https://sites.google.com/site/installationubuntu/tweaking-ubuntu/change-default-filemanager)
+
+# 更好的终端——Tilix
+
+在Gnome桌面环境下，使用的默认模拟终端是Gnome-Terminal，但总感觉用起来不是很爽，许多操作都不是很便捷，如分屏等。虽然可以使用`tmux`，但感觉还是多了一步操作，忒麻烦。
+然而，一个更好的替代方案是`Tilix`，他支持多屏、链接、拖拽、图像等，还有很多快捷键，是一个基于GTK3的比较用户友好的虚拟终端，如下是截屏：
+![](../post_img/59625337ab64416a840013a6)
+
+对于Fedora 25用户，可以直接进行下载安装，如下：
+
+```sh
+$ sudo dnf install tilix
+```
+
+如果没有找到该软件，也可以手动添加远程仓库，如命名为`tilix.repo`，保存于`/etc/yum.repos.d`，内容如下：
+
+```
+[heikoada-terminix]
+name=Copr repo for terminix owned by heikoada
+baseurl=https://copr-be.cloud.fedoraproject.org/results/heikoada/terminix/fedora-$releasever-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/heikoada/terminix/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
+```
+
+尔后更新dnf缓存：
+
+```sh
+$ sudo dnf makecache
+```
+
+即可进行安装。
+其他发行版可以参考[官网](https://gnunn1.github.io/tilix-web/)说明。
+
+

@@ -1,0 +1,76 @@
+title: 标准库类型vector
+date: 2016-10-30 13:33:34
+updated: 2017-02-21 14:56:16
+categories:
+- Study
+- Computer
+- PL
+- C++
+- Class
+---
+
+
+## 1 概要
+
+
+- 标准库类型*vector*表示对象的集合，其中所有对象的类型都相同
+- 集合中的每个对象都有一个与之对应的索引，索引用于访问对象
+- 因为*vector*容纳着其他对象，所以他也常被称为**容器(container)**
+
+
+要想使用*vector*，必须包含头文件*vector*，并使用名称空间*std*。
+
+
+## 2 模板
+
+
+- c++语言既有**类模板(class template)**，也有函数模板，其中*vector*是一个类模板
+- 模板本身不是类或函数，相反，可以将模板看做为编译器生成类或函数编写的一份说明
+- 编译器根据模板创建类或函数的过程称为**实例化(instantiation)**，当使用模板时，需要指出编译器应把类或函数实例化成何种类型
+- *vector*能容纳绝大多数类型的对象作为其元素，但是因为引用不是对象，所以不存在包含引用的*vector*
+
+
+## 3 定义和初始化vector对象
+
+
+```cpp
+#include <vector>
+using namespace std;
+vector<T> v1;               //v1是一个空vector，他潜在的元素是T类型的，执行默认初始化
+vector<T> v2(v1);           //v2包含v1所有元素的副本        
+vector<T> v2 = v1;          //等价于v2(v1)
+vector<T> v3(n, val);       //v3包含了n个重复的元素，每个元素的值都是val
+vector<T> v4(n);            //v4包含了n个重复地执行了默认值初始化的对象
+vector<T> v5{a, b, c};      //v5包含了初始值个数的元素，每个元素被赋予了相应的初始值
+vector<T> v5 = {a, b, c};   //与上式等价
+vector<T> v6(begin(T_arr), end(T_arr));//使用数组初始化vector对象，T_arr是数组
+vector<T> v7(T_arr + n, T_arr + m);    //使用数组T_arr的部分元素初始化vector对象，前提是n与m的范围是合法的
+```
+
+
+## 4 更多操作
+
+
+### 4.1 添加元素
+
+
+利用*vector*的成员函数*push_back*向其中添加元素。
+
+
+- 例子
+
+
+```cpp
+vector<int> vec;
+for(int i = 0; i < 100; ++i)
+    vec.push_back(i);//依次将整数值放到vec的尾端
+//循环结束后，vec有100个元素，从0到99
+```
+
+
+- 注意
+    + c++标准要求vector应该能在运行时高效快速地添加元素
+    + 既然vector对象能高效地增长，那么在定义该对象的时候设定其大小也就没有必要了，并且，这么做性能可能更差
+    + 除非所有元素的值都一样，否则应采取先定义一个空的vector对象，再在运行时向其添加具体值会更好
+    + 要使用*size_type*，需要指定它是由哪种类型定义的，如**vector&lt;int&gt;::size_type**
+    + *vector*对象的小标运算符可用于访问已存在的元素，而不能用于添加元素

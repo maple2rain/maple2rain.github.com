@@ -1,0 +1,66 @@
+title: 获取网易官方搜索引擎mp3外链
+date: 2017-02-21 20:31:11
+updated: 2017-02-21 20:58:06
+tags:
+- Music
+categories:
+- Life
+---
+> 本文整理自[贴吧教程](http://www.ii23.cn/forum.php?mod=viewthread&tid=445829&orderby=dateline)
+
+## 1 适用网站——网易云
+
+## 2 搜索引擎代码
+
+http://s.music.163.com/search/get/?src=lofter&type=1&filterDj=true&s=<br><font color=red>巴黎夜雨</font>&limit=<font color=green>1</font>&offset=0&callback=loft.w.g.cbFuncSearchMusic
+
+其中，红色字体代表歌曲名，绿色字体代表搜索歌曲数量。
+以上述歌曲为例，将上述代码复制至浏览器地址处粘贴并运行，可获得如下代码：
+
+```code
+loft.w.g.cbFuncSearchMusic({
+"result":{
+    "songCount":6,
+    "songs":[{
+        "id":30500958,
+        "name":"巴黎夜雨",
+        "artists":[{"id":1050280,
+            "name":"于亮",
+            "picUrl":null}],
+        "album":{
+            "id":3100597,
+            "name":"伤心的人别听嗨歌",
+            "artist":{
+                "id":0,
+                "name":""
+                ,"picUrl":null
+                },
+            "picUrl":"http://p1.music.126.net/umU2NcK_wjwORorNxnUJdw==/7715273092281138.jpg"
+            },
+        "audio":"http://m2.music.126.net/dB62uj-DTGzMbVvxNW8k5w==/7910986162105718.mp3",
+        "djProgramId":0,"page":"http://music.163.com/m/song/30500958"
+    }]
+},"code":200})
+```
+
+其中，`picUrl`为图片链接，`audio`为音乐链接。
+
+## 3 搜索引擎代码V2
+
+http://music.163.com/api/song/detail/?id=
+<font color=red>歌曲Id</font>&ids=%5B<font color=red>歌曲Id</font>%5D&csrf_token=
+
+- 获得歌曲ID
+    - 获得方法为在网易云搜索栏中输入歌曲名，并再从浏览器地址获得
+    ![](../post_img/58ac3960ab6441067b004216)
+    ![](../post_img/58ac3960ab6441067b004215)
+- 复制歌曲ID代入至引擎代码红色字处。即：
+
+    http://music.163.com/api/song/detail/?id=28661857&ids=%5B28661857%5D&csrf_token=
+- 将这段代码复制到浏览器地址栏中并粘贴运行，会得到一大段代码
+- 根据个人需要获取相应的资源，如`mp3`或图片链接
+
+## 4 另外途径
+
+实验证明，上述使用搜索引擎代码并不总是成功，经常会出现链接失效的情况，故可使用一个[多款音乐MP3网址外链转换器](http://www.360doc.com/content/15/0212/23/18404798_448243574.shtml)。
+一般情况下，使用搜索引擎的方式获取图片，而用转换器获取音乐链接。

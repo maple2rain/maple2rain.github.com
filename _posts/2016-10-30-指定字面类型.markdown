@@ -1,0 +1,37 @@
+title: 指定字面类型
+date: 2016-10-30 13:29:09
+updated: 2017-02-21 15:02:19
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+---
+
+## 1 字面值类型前缀
+
+| 前缀 |             含义            |   类型   |
+|------|-----------------------------|----------|
+| u    | Unicode 16字符              | char16_t |
+| U    | Unicode 32字符              | char32_t |
+| u8   | UTF-8(仅用于字符串字面常量) | char     |
+| L    | 宽字符                      | wchar_t  |
+
+## 2 字面值类型后缀
+
+|   后缀   | 最小匹配类型 |
+|----------|--------------|
+| u or U   | unsigned     |
+| l or L   | long         |
+| ll or LL | long long    |
+| f or F   | float        |
+| l or L   | long double  |
+
+## 3 更多说明
+
+- 对于一个整型字面值来说，能分别制定它是否带符号以及占用多少空间
+- 后缀带有U，则该字面值属于无符号类型，即以U为后缀的十、八、十六进制数都将从*unsigned int*、*unsigned long*和*unsigned long long*中选择能匹配的空间最小的一个作为其数据类型。
+- 如果后缀中有L，则字面值的类型至少是*long*，以此类推
+- 可以将U与L或LL合在一起使用，从而产生*unsigned long*或*unsigned long long*

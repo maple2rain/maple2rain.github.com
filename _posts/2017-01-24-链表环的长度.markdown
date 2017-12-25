@@ -1,0 +1,50 @@
+title: 链表环的长度
+date: 2017-01-24 11:57:47
+updated: 2017-01-24 12:08:08
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给出一个单向链表的头指针，如果有环，则返回环的长度，否则返回0
+
+## 思路
+
+首先，需要判断链表是否有环。使用两指针，一快一慢，如果快指针已经达到了尾部，且他们没有相遇，那么可以判断链表无环。如果他们相遇，则使慢指针遍历一圈，计算环的长度。
+
+## 算法
+
+```java
+class ListNode{
+    int val;
+    ListNode next;
+    ListNode(int _val){
+        this.val = _val;
+        this.next = null;
+    }
+}
+
+int getCircleLength(ListNode head){
+    ListNode slow = head;
+    if(slow == null || slow.next == null) return 0;
+    
+    ListNode fast = slow.next.next;
+    while(fast != null && fast.next != null){
+        if(slow == fast)
+            return getLength(slow);
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return 0;
+}
+
+int getLength(ListNode node){
+    int length = 1;
+    ListNode cur = node;
+    while(cur.next != node){
+        ++length;
+        cur = cur.next;
+    }
+    return length;
+}
+```

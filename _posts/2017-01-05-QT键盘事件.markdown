@@ -1,0 +1,64 @@
+title: QT键盘事件
+date: 2017-01-05 14:42:21
+updated: 2017-01-05 16:01:58
+tags:
+- QT
+categories:
+- Study
+- Computer
+- Graphics
+- QT
+---
+# 1 使用键盘
+
+为使用键盘响应事件，需要为界面类重载`keyPressEvent`。
+基本实现方式如下：
+
+```c++
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_W){//key W for example
+        ...//operation
+    }else{
+        ...//other operation
+    }
+}
+```
+
+需要注意的是，只有窗口有焦点时，键盘事件才有效。
+具体的键盘值可查阅文档。
+
+# 2 组合键
+
+若想使用组合键，则可采取`与`判断方式，如下：
+
+```c++
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == (Qt::ShiftModifier || Qt::ControlModifier || Qt::AltModifier) 
+        && event->key() == Qt::Key_W){//key W for example
+        ...//operation
+    }else{
+        ...//other operation
+    }
+}
+```
+
+其中，上述三个`Modifier`分别表示`Shift`、`Control`、`Alt`键。
+
+# 3 键鼠组合键
+
+若想使用鼠标键盘组合键，则需要重载`mousePressEvent`。
+基本实现方式如下：
+```c++
+void Widget::mousePressEvent(QMouseEvent *e)  
+{  
+    // get the pos of mouse 
+    QPoint pos = e->pos();  
+    if (e->button() == LeftButton) {  
+        if ( QApplication::keyboardModifiers () == Qt::ControlModifier) {  
+            ...//operation
+        }  
+    }  
+}  
+```

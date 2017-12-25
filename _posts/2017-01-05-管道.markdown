@@ -1,0 +1,165 @@
+title: 管道
+date: 2017-01-05 16:55:46
+updated: 2017-01-05 17:02:54
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Special Symbol
+---
+## 1 管道连接
+
+将命令的输出重定向到另一个命令，这个过程称为**管道连接(piping)**。
+管道符号为(**|**)，其为上下两个竖线构成，但看起来更像单个竖线。
+
+管道在两个进程间的通信中架起了一座桥梁，它能够缓存输入到管道中的信息，并让其他进程进行读取，所以从本质上来说管道是一种缓冲区，是一种特殊的**file**。
+但是和普通**file**不同的是，**Linux**下的管道是由一定的大小限制的，所以写管道时会有管道已满的情况发生，这样写操作会被阻塞；读操作也可能被阻塞。（注意管道读操作是一次性操作，数据一旦读取就会被抛弃）。
+**Linux**中管道并没有使用专门的数据结构来实现，而是借助了文件系统的file和**VFS**的索引节点inode，两个file结构指向同一个临时的**VFS**索引节点，然后这个**VFS**索引节点又指向一个物理页面。
+
+- 管道的具体操作方法：
+
+    管道写函数**pipe_write**会将待写入的字节复制到VFS索引节点所指向的物理内存，完成数据写入。
+    管道读函数**pipe_read**则通过从VFS索引节点所指向物理内存内复制字节，读取出数据。
+
+为了解决管道的同步问题，**Linux kernel**使用了**锁**，**等待队列**，**信号**。
+
+## 2 命令格式
+
+```bash
+command1 | command2
+```
+
+此时会将**command1**的输出重定向到**command2**上。
+
+- 注意
+    
+    **管道连接并不是一个一个地运行。**
+    **Linux**系统实际上会同时运行这两个命令，在系统内部将他们连接起来。
+    在第一个命令产生输出的同时，输出会被立即送给第二个命令。
+
+    - 管道命令只处理前一个命令正确输出，不处理错误输出
+    - 管道命令右边命令，必须能够接收标准输入流命令才行
+
+### 2.1 扩展
+可以在一条命令中使用任意多条管道，一般可以在最后使用文本分页命令(如**less**和**more**)来将输出按屏显示。
+
+## 3 进程管道
+
+最简单的在两个程序之间传递数据的方法就是使用**popen**和**pclose**函数了。
+
+```c
+#include <stdio.h>
+FILE *popen(const char *command, const char *open_mode);
+int pclose(FILE *stream_to_close);
+```
+
+### 3.1 popen函数
+
+popen函数允许一个程序将另一个程序作为新进程来启动，并可以传递数据给它或者通过它来接收数据。
+**command**字符串是要运行的程序名和相应的参数。
+**open_mode**必须是"r"或"w"。
+针对每个**popen**调用，不仅要启动一个被请求的程序，还要启动一个shell来解析执行命令，因而每个**popen**调用将多启动两个进程，成本略高。
+
+- 如果**open_mode**是"r"，被调用程序的数据就可以被调用程序使用。
+    - 调用程序利用popen函数返回的文件流指针，就可以通过如**fread**函数来读取被调用程序的输出。
+- 如果**open_mode**是"w"
+   - 调用程序就可以用**fwrite**调用向被调用程序发送数据，而被调用程序可以在自己的标准输入上读取这些数据。
+
+### 3.2 pclose函数
+
+用**popen**启动的进程结束时，可以用**pclose**函数关闭与之关联的文件流。
+**pclose**调用只在**popen**启动的进程结束后才返回。
+- 如果调用**pclose**时该进程仍在运行，则**pclose**调用将等待该进程的结束。
+**pclose**调用的返回值通常是它所关闭的文件流所在进程的退出码。
+- 如果调用进程在调用**pclose**之前执行了一个wait语句，那么被调用进程的退出状态可能会丢失，因为被调用进程已结束，而其退出状态码是返回到wait了。此时，**pclose**将返回-1并设置errno为ECHILD。
+
+### 3.3 简单的例子
+
+下列程序将用**popen**访问**uname**命令给出的信息，并由标准输出进行打印。
+
+```c
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    FILE *read_fp;
+    char buffer[BUFSIZ + 1];
+    int chars_read;
+    memset(buffer, '\0', sizeof(buffer));
+    read_fp = popen("uname -a", "r");//使用uname命令，并获取该文件流指针
+    if (read_fp != NULL) {
+        chars_read = fread(buffer, sizeof(char), BUFSIZ, read_fp);//从文件流读取数据
+        if (chars_read > 0) {
+            printf("Output was:-\n%s\n", buffer);//打印结果
+        }
+        pclose(read_fp);//关闭文件流指针
+        exit(EXIT_SUCCESS);
+    }
+    exit(EXIT_FAILURE);
+}
+```
+
+程序执行输出如下，这是本人的机器输出结果：
+![](../post_img/586e0a0bab6441236e004761)
+
+## 4 pipe调用
+
+高级的**popen函数**实质上是调用了底层的**pipe**函数。
+通过这个函数在两个程序之间传递数据不需要启动一个shell来解释请求的命令，并且还提供了更多的数据读写控制。
+
+### 4.1 函数原型
+
+```c
+#include <unistd.h>
+int pipe(int file_descriptor[2]);
+```
+
+参数是一个由两个整数类型的文件描述符组成的数组的指针。
+该函数在数组中填上两个新的文件描述符后返回0，如果失败则返回-1并设置errno来表明失败的原因，如
+
+- EMFILE:    进程使用的文件描述符过多
+- ENFILE:    系统的文件表已满
+- EFAULE:    文件描述符无效
+
+写到file_descriptor[1]的所有数据都可以从file_descriptor[0]读回来。数据基于先进先出的原则。
+要注意的是，使用文件描述符时是需要用底层的read和write调用来访问数据。
+
+### 4.2 简单的例子
+
+```c
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    int data_processed;
+    int file_pipes[2];
+    const char some_data[] = "maple";//将要写入输出的数据
+    char buffer[BUFSIZ + 1];
+
+    memset(buffer, '\0', sizeof(buffer));
+
+    if (pipe(file_pipes) == 0) {//填充文件描述符
+        data_processed = write(file_pipes[1], some_data, strlen(some_data));//向文件描述符写入数据
+        printf("Wrote %d bytes\n", data_processed);
+        data_processed = read(file_pipes[0], buffer, BUFSIZ);//从文件描述符读取数据
+        printf("Read %d bytes: %s\n", data_processed, buffer);
+        exit(EXIT_SUCCESS);
+    }
+    exit(EXIT_FAILURE);
+}
+```
+ 
+程序执行结果如下图所示：
+![](../post_img/586e0a15ab6441209e00488a)
+ 

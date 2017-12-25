@@ -1,0 +1,50 @@
+title: 链表两数相加
+date: 2017-01-25 11:35:18
+updated: 2017-01-25 22:00:40
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 给出两个正整数，每个整数由一个链表表示。其中链表的每个节点保存数的数位，这些数反序存在链表中，即高位在最后，低位在最前。返回一个链表代表这两个数之和。
+
+## 思路
+
+注意到每个节点代表一个数位，节点的值在0到9之间，两个节点的和可能超过9,因此需要有个变量记录可能的进位。由于数位反序存在链表之中，从两个链表头开始顺序相加即可。同时注意到两个输入链表可能长度不一样，有个巧妙的方法是，只要链表还有未处理的节点，或者只要还有进位，就进行节点相加;对于当前指针指向空节点时，使用0代表其值，并且使用NULL代表其进行下一轮迭代节点。
+
+```java
+class ListNode{
+    int val;
+    ListNode next;
+    ListNode(int _val){
+        this.val = _val;
+        this.next = null;
+    }
+}
+
+ListNode addTwoNumbers(ListNode l1, ListNode l2){
+    ListNode item1 = l1, item2 = l2;
+    ListNode list = null, tail = null;
+    int carry = 0;
+    while(itme1 != null || item2 != null || carry != 0){
+        int num1 = item1 == null ? 0 : item1.val;//set value as 0 while node is null
+        int num2 = item2 == null ? 0 : item2.val;
+        
+        int sum = num1 + num2 + carry;
+        carry = sum / 10;
+        sum %= 10;
+        
+        if(list != null){
+            tail.next = new ListNode(sum);
+            tail = tail.next;
+        }else{
+            list = new ListNode(sum);
+            tail = list;
+        }
+        
+        item1 = item1 == null ? null : item1.next;//set item as null or next nod
+        item2 = item2 == null ? null : item2.next;
+    }
+    return list;
+}
+```

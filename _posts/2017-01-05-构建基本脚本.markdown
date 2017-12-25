@@ -1,0 +1,93 @@
+title: 构建基本脚本
+date: 2017-01-05 16:39:43
+updated: 2017-01-05 17:01:44
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Base
+---
+## 1 创建shell脚本文件
+
+在创建**shell**脚本文件时，必须在文件的第一行指定要使用的**shell**，其基本格式为：
+
+```sh
+#!/bin/bash
+```
+
+在通常的**shell**脚本的行里，**#**用作注释行。
+然而，脚本文件的第一行是个特例，他用于告诉**shell**用哪个**shell**来运行脚本，如将上例的**bash**改为**csh**。
+<font color=red>默认脚本文件名为**xxx.sh**以方便辨认。</font>
+
+## 2 运行脚本
+
+运行脚本之前，需要保证指定的**shell**能够找到脚本文件，具体可以使用下述方法：
+
+- 将**shell**脚本文件所处的目录添加到**PATH**环境变量中
+- 在提示符中使用绝对或相对文件路径来引用脚本文件
+
+如脚本文件为**test.sh**，则可以用下列的方式运行之：
+
+```bash
+bash test.sh    //此时运行的shell选择bash shell
+test.sh         //脚本文件已经添加到PATH环境变量中了
+./test.sh       //执行当前目录下的脚本文件
+```
+
+- 无法运行
+
+    当直接执行脚本文件时，会出现以下提示
+    ![](../post_img/586e06c0ab6441209e00471e)
+    其原因是用户还没有该文件的执行权限
+    ![](../post_img/586e06d2ab6441236e00465c)
+    ```bash
+    chmod u+x test.sh
+    ```
+    此时便可以正常运行脚本了。
+## 3 运行命令
+
+指定了**shell**之后，可在文件的每行输入命令，后加一个回车符，如：
+
+```sh
+#!/bin/bash
+date
+who
+```
+
+上例中，运行该脚本时，将顺序执行**date**与**who**命令。
+![](../post_img/586e06e1ab6441236e004664)
+
+## 4 显示消息
+
+使用**echo**命令可以输出简单的文本字符串。
+
+```bash
+$ echo This is a test
+This is a test
+```
+
+**echo**可用**单引号**或**双引号**将文本字符串圈起来。使用时，如果在文本中使用其中一种引号，则需要用另一种来将字符串圈起来。
+
+```bash
+$ echo "say 'hello'"
+say 'hello'
+$ echo 'say "hello"'
+say "hello"
+```
+
+- 同一行输出
+
+    如果想在同一行显示一个文本字符串作为命令输出，可以使用**-n**参数。
+
+    ```sh
+    #!/bin/bash
+    echo -n "the time is :"
+    date
+    who
+    ```
+![](../post_img/586e06eaab6441209e00472d)

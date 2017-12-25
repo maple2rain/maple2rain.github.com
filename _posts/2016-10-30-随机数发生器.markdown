@@ -1,0 +1,102 @@
+title: 随机数发生器
+date: 2016-10-30 09:25:59
+updated: 2016-10-30 14:41:38
+tags:
+- OpenCv
+categories:
+- Study
+- Computer
+- Graphics
+- OpenCV
+- Drawing
+---
+## 1 随机数发生器类
+
+随机数发生器类是**RNG(Random Number Generator)**。
+要用到随机数发生器时，需要先实例化一个随机数发生器对象，如
+
+```cpp
+RNG rng(0xff);//以0xff为种子实例化对象
+```
+
+## 2 指定随机数范围
+
+使用**uniform**方法
+
+```cpp
+c = rng.uniform(a, b);//指定了一个在a和b之间的均匀分布(包含a,但不包含b)
+```
+
+## 3 获取随机值
+
+可以使用指定随机数范围返回随机值，也可以直接获得随机值
+
+```cpp
+c = (unsigned)rng;//将rng转换为无符号数，也可以是其他类型
+```
+
+### 3.1 高斯随机变量
+
+使用**gaussian**方法返回均值为0的高斯随机变量。
+```cpp
+//! returns Gaussian random variate with mean zero.  
+double gaussian(double sigma);//返回均值为0的高斯随机变量，  
+/*double RNG::gaussian(double sigma) 
+{ 
+    float temp; 
+    randn_0_1_32f( &temp, 1, &state ); 
+    return temp*sigma; 
+}*/  
+```
+
+## 4 矩阵随机函数
+
+```cpp
+void RNG::fill(InputOutputArray mat, int distType, InputArray a, InputArray b, bool saturateRange=false )
+```
+
+这个函数是对矩阵mat填充随机数。
+随机数的产生方式由参数2**distType**来决定，如果为参数2的类型为RNG::UNIFORM，则表示产生均一分布的随机数，如果为RNG::NORMAL则表示产生高斯分布的随机数。
+对应的参数3和参数4为上面两种随机数产生模型的参数。
+
+- 如果随机数产生模型为均匀分布，则参数a表示均匀分布的下限，参数b表示上限。
+- 如果随机数产生模型为高斯模型，则参数a表示均值，参数b表示方程。
+
+参数5只有当随机数产生方式为均匀分布时才有效，表示的是是否产生的数据要布满整个范围。另外，需要注意的是用来保存随机数的矩阵mat可以是多维的，也可以是多通道的，目前最多只能支持4个通道。
+
+## 5 随机打乱数组数据
+
+```cpp
+void randShuffle(InputOutputArray dst, double iterFactor=1., RNG* rng=0 )
+```
+
+该函数表示随机打乱1D数组dst里面的数据，随机打乱的方式由随机数发生器rng决定。
+*iterFactor*为随机打乱数据对数的因子，总共打乱的数据对数为：
+$$dst.rows*dst.cols*iterFactor$$
+因此如果为0，表示没有打乱数据。
+
+## 6 聚类算法
+```cpp
+
+double kmeans(InputArray data, int K, InputOutputArray bestLabels, TermCriteria criteria, int attempts, int flags, OutputArray centers=noArray() )
+
+```
+
+该函数为kmeans聚类算法实现函数。
+
+- 参数data表示需要被聚类的原始数据集合，一行表示一个数据样本，每一个样本的每一列都是一个属性
+
+- 参数k表示需要被聚类的个数；参数bestLabels表示每一个样本的类的标签，是一个整数，从0开始的索引整数；
+
+- 参数criteria表示的是算法迭代终止条件；
+
+- 参数attempts表示运行kmeans的次数，取结果最好的那次聚类为最终的聚类，要配合下一个参数flages来使用；
+
+- 参数flags表示的是聚类初始化的条件。其取值有3种情况，如果为KMEANS_RANDOM_CENTERS，则表示为随机选取初始化中心点，如果为KMEANS_PP_CENTERS则表示使用某一种算法来确定初始聚类的点；如果为KMEANS_USE_INITIAL_LABELS，则表示使用用户自定义的初始点，但是如果此时的attempts大于1，则后面的聚类初始点依旧使用随机的方式；
+
+- 参数centers表示的是聚类后的中心点存放矩阵。该函数返回的是聚类结果的紧凑性，其计算公式为：
+
+　　
+
+
+来源： http://www.cnblogs.com/tornadomeet/archive/2012/11/23/2783709.html

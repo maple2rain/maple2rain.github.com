@@ -1,0 +1,27 @@
+title: 使用方括号
+date: 2017-01-05 16:57:03
+updated: 2017-01-05 17:03:00
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Special Symbol
+---
+## 1 使用方括号
+
+**bash shell**兼容了**expr**命令，但同样也提供了一个执行数学表达式的更简单的方法。
+在**bash**中，可以在将一个数学运算结果赋给某个变量时，使用**$**和方括号($[expression])将数学表达式圈起来。
+
+```bash
+$ var=$[1 + 5]
+$ echo $var
+6
+```
+
+使用方括号时，不用担心**shell**会误解运算符和命令符号。
+不过遗憾的是，**bash shell**只支持整数运算。

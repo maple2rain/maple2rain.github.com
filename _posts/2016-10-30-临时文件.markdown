@@ -1,0 +1,88 @@
+title: 临时文件
+date: 2016-10-30 16:01:44
+updated: 2017-02-21 15:12:30
+tags:
+- LinuxAPI
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Environment
+---
+
+## 1 唯一文件名
+
+使用**tmpnam**函数可以生成一个唯一的文件名，名字不与任何已存在文件同名的有效文件名。
+对**tmpnam**的后续调用会覆盖存放返回值的静态存储区。
+
+- 函数原型
+
+    ```c
+    /**
+     * s             :随意传入的字符串，长度至少为L_tmpnam
+     * 最多可调用次数:TMP_MAX
+     * 返回值        :字符串，即文件名
+     * 头文件        :stdio.h
+     */
+    char *tmpnam(char *s);
+    ```
+
+## 2 打开临时文件
+
+**tmpfile**函数返回一个文件流指针，其指向一个唯一的临时文件，该文件以读写方式打开，并在所有引用关闭时，删除该临时文件。
+该函数保证不会产生同名的文件。
+如果出错，则返回空指针并设置errno的值。
+
+- 函数原型
+
+    ```c
+    /**
+     * 返回值  :文件流指针
+     * 头文件  :stdio.h
+     */
+    FILE *tmpfile(void);
+    ```
+
+## 3 例子
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    char tmpname[L_tmpnam];
+    char *filename;
+    FILE *tmpfp;
+
+    filename = tmpnam(tmpname);
+    
+    printf("Calling tmpnam()\n");
+    printf("Temp file name is :%s\n", filename);
+
+    tmpfp = tmpfile();
+
+    printf("Calling tmpfile()\n");
+    if (tmpfp)
+        printf("Open temp file OK\n");
+    else
+        perror("tmpfile");
+    
+    exit(0);
+}
+```
+- 执行结果
+    ![执行结果](../post_img/5815a952ab644162e10045e5)
+
+    可以看到，编译时出现一个警告，表示最好使用**mkstemp**。
+    该函数原型为
+    ```c
+    /**
+     * template   :文件名模板
+     * 返回值     :文件描述符
+     * 头文件     :stdlib.h  
+     */
+    int mkstemp(char *template);
+    ```

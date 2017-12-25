@@ -1,0 +1,60 @@
+title: QT5连接MySQL
+date: 2017-01-05 10:16:55
+updated: 2017-01-05 16:01:17
+tags:
+- QT
+categories:
+- Study
+- Computer
+- Graphics
+- QT
+---
+# 1 需要libmysql.dll
+
+在QT的老版本中，若想使用MySQL，则需自行编译驱动，但QT5已经自动地把这些问题人性化地解决了。但是，若实际开发中想使用MySQL，还得需要做一些准备。
+
+1. 安装MySQL
+2. 在MySQL安装路径下，找到`libmysql.dll`，具体路径在`%path\MySQL\MySQL Server 5.7\lib`，其中，`%path`即为安装路径，如笔者的完整开发路径为`C:\Program Files\MySQL\MySQL Server 5.7\lib`，驱动文件即在该目录下。
+
+# 2 放置libmysql.dll
+
+在找到驱动文件后，下一步即是将该驱动文件放置与QT安装目录的`bin`件夹下，具体路径为`%ppath\Qt5.6.2\5.6\msvc2015_64\bin`，其中，`%path`即为安装路径，如笔者的完整开发路径为`G:\Qt\Qt5.6.2\5.6\msvc2015_64\bin`，将驱动文件放置与该目录下即可。
+
+# 3 设置pro文件
+
+在所建立的工程`pro`文件中，添加一行语句，如：
+
+```c++
+QT +=   core gui\
+        sql //add sql symbol
+```
+
+# 4 测试连接
+在所需要用到`sql`的地方添加头文件`<QtSql>`。
+写一段测试代码，可以测试QT支持的数据库类型，如下：
+
+```c++
+qDebug()<<"available drivers:";
+QStringList drivers = QSqlDatabase::drivers();
+
+foreach(QString driver, drivers)
+    qDebug() << driver;
+```
+若上述输出有`QMYSQL`字样，则表示支持MySQL。
+
+再编写一段连接测试代码，如下：
+
+```c++
+QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+db.setHostName("localhost");
+db.setDatabaseName("mysql");    //one of your database
+db.setUserName("root");         //user
+db.setPassword("1111");         //password
+if (!db.open())
+    qDebug() << "Failed to connect to root mysql admin";
+else{
+    qDebug() << "Connect successfully";
+}
+```
+
+一般到此则可以完成实现QT连接MySQL操作。

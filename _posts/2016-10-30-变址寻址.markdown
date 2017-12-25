@@ -1,0 +1,63 @@
+title: 变址寻址
+date: 2016-10-30 13:40:09
+updated: 2017-02-21 16:11:37
+tags:
+- ADR
+categories:
+- Study
+- Computer
+- PL
+- Asm
+- 80x86
+- LocateMode
+---
+
+## 1 变址寻址
+
+在所有地址运算完成后，指令终将访问的内存地址称为**有效地址(effctive address)**。
+变址寻址模式通过将变量地址——也称为**位移(displacement)**或**偏移(offset)**——与32位寄存器值相加，计算有效地址，即指令准备访问的内存地址。
+
+## 2 HLA变址寻址
+
+**HLA**采用下列变址寻址语法，其中**VarName**为程序中某个静态变量的名字。
+
+```asm
+mov(VarName[eax], al);  //将VarName的地址与寄存器eax的值相加后得到的地址中的内容放入寄存器al
+```
+
+## 3 MASM和TASM变址寻址
+
+**MASM**和**TASM**在寄存器间接寻址模式的语法与**HLA**基本一样，只不过操作数的顺序需要颠倒。
+
+```asm
+mov al, VarName[eax]  //将VarName的地址与寄存器eax的值相加后得到的地址中的内容放入寄存器al
+```
+
+他们还允许操作数多种变形。
+
+```asm
+//下列操作数等效
+VarName[eax];
+[eax + VarName];
+[VarName][eax];
+[eax][VarName];
+Varname[eax+const];
+...
+```
+
+## 4 Gas的变址寻址
+
+Gas则以圆括号括住寄存器名。
+
+```asm
+movb (VarName(%eax), al  //将VarName的地址与寄存器eax的值相加后得到的地址中的内容放入寄存器al
+```
+
+同样允许操作数多种变形。
+
+```asm
+//下列操作数等效
+VarName(%eax)
+const(%eax)
+VarName+const(%eax)
+```

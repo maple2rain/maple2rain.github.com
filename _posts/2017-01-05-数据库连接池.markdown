@@ -1,0 +1,257 @@
+title: 数据库连接池
+date: 2017-01-05 11:41:25
+updated: 2017-01-05 16:01:12
+tags:
+- QT
+categories:
+- Study
+- Computer
+- Graphics
+- QT
+---
+# 1 创建连接池
+
+创建数据库连接池的目的是为了提高使用数据库连接的效率
+在寻常的`用完即关闭`的模式下，倘若需要频繁操作数据库，则打开连接的开销将成为系统效率的瓶颈。为此，引入连接池的概念。即用完一个连接后并不立即将其关闭，而是将其存放于一个被称为`连接池`的空间中，在以后需要用到的时候直接从连接池取，而不必重新打开连接。这将大大提高系统的运行效率，即使需要多付出一点空间代价，然后利远大于弊。
+
+# 2 范例
+
+接下来直接介绍一个连接池使用范例。
+
+- 头文件
+```c++
+#ifndef CONNECTIONPOOL_H
+#define CONNECTIONPOOL_H
+
+#include <QtSql>
+#include <QQueue>
+#include <QString>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QDebug>
+#include <QSettings>
+
+class ConnectionPool {
+
+public:
+    //user interface
+    static void release();                                // close all the connection
+    static QSqlDatabase openConnection();                 // get a connection from database
+    static void closeConnection(QSqlDatabase connection); // put connection to connection-pool
+
+    ~ConnectionPool();
+
+private:
+    static ConnectionPool& getInstance();
+
+    ConnectionPool();
+    ConnectionPool(const ConnectionPool &other);
+    ConnectionPool& operator=(const ConnectionPool &other);
+    QSqlDatabase createConnection(const QString &connectionName); // create a connection
+
+    QQueue<QString> usedConnectionNames;   // store connections that have been used
+    QQueue<QString> unusedConnectionNames; // store connections that haven't been used
+
+    // the info of database
+    QString hostName;
+    QString databaseName;
+    QString username;
+    QString password;
+    QString databaseType;
+
+    bool    testOnBorrow;    // whether to check that the connection is valid
+    QString testOnBorrowSql; // test sql
+
+    int maxWaitTime;  // max wait time to wait for a valid connection
+    int waitInterval; // wait time interval
+    int maxConnectionCount; // max number of connection in this pool
+
+    static QMutex mutex;
+    static QWaitCondition waitConnection;
+    static ConnectionPool *instance;
+
+};
+
+#endif // CONNECTIONPOOL_H
+```
+
+- 源文件
+
+```c++
+#include "ConnectionPool.h"
+
+QMutex ConnectionPool::mutex;
+QWaitCondition ConnectionPool::waitConnection;
+ConnectionPool* ConnectionPool::instance = NULL;
+
+ConnectionPool::ConnectionPool() {
+    hostName     = "localhost"; //host name
+    databaseName = "Jobs";      //the database that will be accessed
+    username     = "root";      //user
+    password     = "123456";    //password
+    databaseType = "QMYSQL";    //database type
+
+	testOnBorrow = true;
+	testOnBorrowSql = "SELECT 1";
+
+	maxWaitTime  = 1000;
+	waitInterval = 200;
+	maxConnectionCount  = 1000;
+}
+
+ConnectionPool::~ConnectionPool() {
+    // destory all the connection when destruct
+	foreach(QString connectionName, usedConnectionNames) {
+		QSqlDatabase::removeDatabase(connectionName);
+	}
+
+	foreach(QString connectionName, unusedConnectionNames) {
+		QSqlDatabase::removeDatabase(connectionName);
+	}
+    
+    release();
+}
+
+ConnectionPool& ConnectionPool::getInstance() {
+	if (NULL == instance) {
+		QMutexLocker locker(&mutex);
+
+		if (NULL == instance) {
+			instance = new ConnectionPool();
+		}
+	}
+
+	return *instance;
+}
+
+void ConnectionPool::release() {
+	QMutexLocker locker(&mutex);
+	delete instance;
+	instance = NULL;
+}
+
+QSqlDatabase ConnectionPool::openConnection() {
+	ConnectionPool& pool = ConnectionPool::getInstance();
+    QString connectionName;
+
+    //  get avalible types of database
+    //    qDebug()<<"available drivers:";
+    //    QStringList drivers = QSqlDatabase::drivers();
+    //    foreach(QString driver, drivers)
+    //        qDebug() << driver;
+
+	QMutexLocker locker(&mutex);
+
+    //  the number of connection that have been created
+	int connectionCount = pool.unusedConnectionNames.size() + pool.usedConnectionNames.size();
+
+    // if there is not connection left, that wait each waitInterval ms for connection available, not more than maxWaitTime
+	for (int i = 0;
+		 i < pool.maxWaitTime
+		 && pool.unusedConnectionNames.size() == 0 && connectionCount == pool.maxConnectionCount;
+		 i += pool.waitInterval) {
+		waitConnection.wait(&mutex, pool.waitInterval);
+
+        // recount the number of connection
+		connectionCount = pool.unusedConnectionNames.size() + pool.usedConnectionNames.size();
+	}
+
+	if (pool.unusedConnectionNames.size() > 0) {
+        // reuserd unused connection
+		connectionName = pool.unusedConnectionNames.dequeue();
+	} else if (connectionCount < pool.maxConnectionCount) {
+        // create new connection when there is not unused connection and the number of connection are less than max
+		connectionName = QString("Connection-%1").arg(connectionCount + 1);
+	} else {
+		qDebug() << "Cannot create more connections.";
+		return QSqlDatabase();
+	}
+
+    // create new connection
+	QSqlDatabase db = pool.createConnection(connectionName);
+
+    // put valid connection to usedConnectionNames
+	if (db.isOpen()) {
+		pool.usedConnectionNames.enqueue(connectionName);
+        qDebug() << "create new connection.";
+	}
+
+	return db;
+}
+
+void ConnectionPool::closeConnection(QSqlDatabase connection) {
+	ConnectionPool& pool = ConnectionPool::getInstance();
+	QString connectionName = connection.connectionName();
+
+    // if exists in used, then put it in unused
+	if (pool.usedConnectionNames.contains(connectionName)) {
+		QMutexLocker locker(&mutex);
+		pool.usedConnectionNames.removeOne(connectionName);
+		pool.unusedConnectionNames.enqueue(connectionName);
+		waitConnection.wakeOne();
+    }else{
+        connection.close();
+    }
+}
+
+QSqlDatabase ConnectionPool::createConnection(const QString &connectionName) {
+    // if connection has been created, then reuse it
+	if (QSqlDatabase::contains(connectionName)) {
+		QSqlDatabase db1 = QSqlDatabase::database(connectionName);
+
+		if (testOnBorrow) {
+			qDebug() << "Test connection on borrow, execute:" << testOnBorrowSql << ", for" << connectionName;
+			QSqlQuery query(testOnBorrowSql, db1);
+
+			if (query.lastError().type() != QSqlError::NoError && !db1.open()) {
+				qDebug() << "Open datatabase error:" << db1.lastError().text();
+				return QSqlDatabase();
+			}
+		}
+
+		return db1;
+	}
+
+    // create a new connection
+	QSqlDatabase db = QSqlDatabase::addDatabase(databaseType, connectionName);
+	db.setHostName(hostName);
+	db.setDatabaseName(databaseName);
+	db.setUserName(username);
+	db.setPassword(password);
+	//db.setPort(3306);
+
+	if (!db.open()) {
+		qDebug() << "Open datatabase error:" << db.lastError().text();
+		return QSqlDatabase();
+	}
+
+	return db;
+}
+
+```
+
+用户使用时，实际上只需要配置数据库的相关信息，即修改下列构造函数，修改为个人使用的数据库信息
+
+```c++
+ConnectionPool::ConnectionPool() {
+    hostName     = "localhost"; //host name
+    databaseName = "Jobs";      //the database that will be accessed
+    username     = "root";      //user
+    password     = "123456";    //password
+    databaseType = "QMYSQL";    //database type
+    testOnBorrow = true;
+    testOnBorrowSql = "SELECT 1";
+    maxWaitTime  = 1000;
+    waitInterval = 200;
+    maxConnectionCount  = 1000;
+}
+```
+
+而在实际使用时，只需调用3个接口，即：
+
+```c++
+    //user interface
+    static void release();                                // close all the connection
+    static QSqlDatabase openConnection();                 // get a connection from database
+    static void closeConnection(QSqlDatabase connection); // put connection to connection-pool
+```

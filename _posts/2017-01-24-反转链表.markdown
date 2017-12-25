@@ -1,0 +1,68 @@
+title: 反转链表
+date: 2017-01-24 12:56:41
+updated: 2017-01-24 13:08:33
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 将单链表的链接进行反转
+
+## 思路
+
+### 递归
+
+在递归函数中内除了递归调用函数以外，还需要做两件事，
+
+1. 反转指针的指向
+2. 返回新的链表头
+
+### 算法
+
+```java
+class ListNode{
+    int val;
+    ListNode next;
+    ListNode(int _val){
+        this.val = _val;
+        this.next = null;
+    }
+}
+
+ListNode reverseList(ListNode head, ListNode newHead){
+    if(head == null || head.next == null){//recursion stop condition
+        newHead = head;
+        return head;
+    }
+    
+    ListNode pre = reverseList(head.next, newHead);
+    pre.next = head;// reverse
+    head.next = null;
+    return head;
+}
+```
+
+### 非递归
+
+使用dummy节点，简化单表头为空或者只含有单个节点的判断。初始化时，dummy.next指向head，并从第二个节点开始遍历，把遍历过的节点依次插入在dummy节点后。最后返回dummy.next即可。
+
+### 算法
+
+```java
+ListNode reverseList(ListNode){
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    if(head == null) return head;
+    ListNode cur = head.next;//start from second node
+    head.next = null;//last node point to null
+    
+    while(cur != null){//insert node cur to new list
+        ListNode next = cur.next;
+        cur.next = dummy.next;
+        dummy.next = cur;
+        cur = next;
+    }
+    
+    return dummy.next;
+}
+```

@@ -1,0 +1,67 @@
+title: 可变形参
+date: 2016-10-30 13:31:05
+updated: 2017-02-21 16:00:33
+tags:
+- C++
+categories:
+- Study
+- Computer
+- PL
+- C++
+- Function
+---
+
+## 1 含有可变形参的函数
+
+有时无法提前与之应该向函数传递几个实参，如输出程序产生的错误信息。
+此时最好用同一个函数实现该项功能，以便对所有错误的处理能够整齐划一。
+为了处理不同数量实参的函数，c++新标准提供了两种主要的方法：
+
+- 如果所有的实参类型相同，可以传递一个名为*initializer_list*的标准库类型
+- 如果实参的类型不同，可以编写一种特殊的函数，即可变参数模板
+
+## 2 initializer_list形参
+
+*initializer_list*是一种标准库类型，用于表示某种特定类型的值的数组，定义在同名头文件中。
+
+### 2.1 操作方法
+
+```cpp
+#include <initilaizer_list>
+initializer_list<T> list;   //默认初始化：T类型元素的空列表
+initializer_list<T> list{a, b, c...};   //list的元素数量和初始值一样多；
+                                        //list的元素是对应初始值的副本；
+                                        //列表中的元素是const类型
+list2(list1);   //拷贝或赋值一个对象；                                       
+list2 = list1;  //拷贝后，原始列表和副本共享元素
+list.size();    //列表中的元素数量
+list.begin();   //返回指向list中首元素的指针
+list.end();     //返回指向list中尾元素下一位置的指针
+```
+
+- *initilaizer_list*也是一种模板类型，所以在定义时需要说明列表中所含元素的类型
+- *initilaizer_list*对象中的元素永远是常量值，无法被改变
+- 含有initializer_list形参的函数也可以同时拥有其他形参
+
+- 可变形参函数示例
+
+    ```cpp
+    void error_msg(initilaizer_list<string> list)
+    {
+        for (auto begin = list.begin(); begin != list.end(); ++begin)//获取元素
+            cout << *begin << " ";
+        cout << endl;
+    }
+    ```
+
+- 调用可变形参函数示例
+
+    如果向initializer_list形参中传递一个值得序列，则必须把序列列放在一对花括号{}内，举例：
+
+    ```cpp
+    if(expected!=actual)
+        error_msg({"functionX",expected,actual});
+    else
+        error_msg({"functionX","OK"});
+    ```
+

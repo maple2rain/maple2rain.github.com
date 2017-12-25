@@ -1,0 +1,87 @@
+title: JNI多线程问题
+date: 2017-11-15 16:04:39
+updated: 2017-11-15 16:54:05
+categories:
+- Study
+- BugCollections
+- Java
+---
+## 问题
+
+在调用JNI的方法时，部分会需要用到`JNIEnv`，因此想着保留该实例以让其他需要用到的地方直接用，而不用每次都被迫使用`native`方法。但是在多线程情况下，由于JVM的每个线程绑定每个独立的`JNIEnv`，所以在跨线程使用时会失败。
+
+## 解决
+
+在Java虚拟机启动时，保留`JavaVM`实例，并在需要用到`JNIEnv`的地方进行获取，使用方法如下：
+
+```cpp
+JavaVM *g_jvm;
+#define JNI_VERSION JNI_VERSION_1_6 // use 1.6 version right now
+
+jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+	SWLog("JNI_OnLoad");
+	g_jvm = vm;
+	return JNI_VERSION; // Return this macro and only use this macro below
+}
+
+void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
+{
+	SWLog("JNI_OnUnLoad");
+	JNIEnv *jni_env;
+	g_jvm->GetEnv((void**)&jni_env, JNI_VERSION);
+
+	//...
+	// Do some thing to recycle resource
+}
+
+/* Check if exception throw and if so, clear it */
+#define CHECK_EXCEPTION(env)		\
+do									\
+{									\
+	if ((env)->ExceptionOccurred())	\
+	{								\
+		(env)->ExceptionDescribe();	\
+		(env)->ExceptionClear();	\
+	}								\
+} while (0)
+
+int AttachJvmThread(JNIEnv **jni_env)
+{
+	int err = 0;
+	g_jvm->GetEnv((void**)jni_env, JNI_VERSION);
+
+	err = g_jvm->AttachCurrentThread(jni_env, NULL);
+	if (err != JNI_OK)
+	{
+		SWLog("%s, Attach current thread failed", __func__);
+	}
+
+	CHECK_EXCEPTION(*jni_env);
+
+	return err;
+}
+
+void DetachJvmThread(JNIEnv *jni_env)
+{
+	CHECK_EXCEPTION(jni_env);
+	g_jvm->DetachCurrentThread();
+}
+
+void Example(void)
+{
+	JNIEnv* jni_env = NULL;
+	if (JNI_OK == AttachJvmThread(&jni_env))
+	{
+		jni_env->CallVoidMethod(jobject, methodId); // Call method in different thread
+		CHECK_EXCEPTION(jni_env);
+
+		DetachJvmThread(jni_env);
+	}
+}
+
+```
+
+- 注意
+
+    如果在同一线程使用该方式调用方法，则会出现类似`线程尝试detach`的异常。

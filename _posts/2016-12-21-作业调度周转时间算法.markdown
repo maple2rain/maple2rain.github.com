@@ -1,0 +1,18 @@
+title: 作业调度周转时间算法
+date: 2016-12-21 09:28:31
+updated: 2016-12-21 10:07:41
+categories:
+- Study
+---
+周转时间 $T_i = T_{end} - T_{begin}$
+<font color=red>注：$T_{end}$表示作业完成时间，$T_{begin}$表示作业开始时间。</font>
+
+平均周转时间 $T=\frac{1}{n}\sum_{i = 1}^n T_i$
+<font color=red>注：$T_{i}$表示各个作业的周转时间，n表示作业数目。</font>
+
+带权周转时间 $W_i = \frac{T_i}{T_s}$
+<font color=red>注：$T_{s}$表示系统为作业提供服务的时间。</font>
+
+平均带权周转时间 $W_{aver} = \frac{1}{n}\sum_{i = 1}^n W_i$
+
+$优先权 = \frac{等待时间+要求服务时间}{要求服务时间}$

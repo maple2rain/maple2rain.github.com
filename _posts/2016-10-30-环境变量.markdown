@@ -1,0 +1,87 @@
+title: 环境变量
+date: 2016-10-30 16:08:28
+updated: 2017-02-21 15:12:23
+tags:
+- LinuxAPI
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Environment
+---
+## 1 环境变量
+
+环境变量是用来控制shell脚本和其他程序行为的变量。
+环境由一组格式为“名字=值”的字符串组成
+
+## 2 获取环境变量
+
+函数**getenv**以给定的名字搜索环境中的一个字符串，并返回与该名字相关的值。
+
+- 如果请求的变量不存在，则返回**null**
+- 如果变量存在但无关联值，将运行成功并返回一个空字符串
+
+由于返回的字符串是存储在**getenv**提供的静态空间中，所以如果想进一步使用它，需要将其复制到另一个字符串中，以免其被后续的函数调用覆盖。
+
+- 函数原型
+
+    ```c
+    /**
+     * name    :待搜索的变量名
+     * 头文件  :stdlib.h
+     */
+    char *getenv(const char *name*);
+    ```
+
+## 3 设置环境变量
+
+函数**putenv**以一个格式为**名字=值**的字符串作为参数，并将该字符擦混加到当前环境中。
+如果可用内存不足而不能扩展环境，则会失败并返回-1，否则返回0。
+但设置的环境仅对程序本身有效，无法将其反映到外部环境中。
+
+- 函数原型
+
+    ```c
+    /**
+     * string   :格式为"var=value"
+     * 头文件   :stdlib.h
+     */
+    int putenv(const char *string*);
+    ```
+
+## 4 environ变量
+
+可以通过**environ**变量直接访问环境变量字符串数组。
+
+- 变量声明
+
+```c
+#include <stdlib.h>
+extern char **environ;
+```
+
+- 打印变量
+
+```c
+#include <stdlib.h> 
+#include <stdio.h> 
+extern char **environ; 
+ 
+int main(void) 
+{ 
+    char **env = environ; 
+    while (*env) //遍历打印
+    { 
+        printf("%s\n", *env); 
+        env++; 
+    } 
+ 
+    exit(0); 
+}
+```
+
+- 执行结果
+    
+    ![title](../post_img/5815aa9dab644162e1004600)

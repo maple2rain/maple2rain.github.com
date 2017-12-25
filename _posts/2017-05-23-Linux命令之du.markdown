@@ -1,0 +1,53 @@
+title: Linux命令之du
+date: 2017-05-23 16:37:44
+updated: 2017-05-23 16:55:54
+tags:
+- Linux Command
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- Command
+---
+> `du`命令意为*disk usage*，即查看磁盘的使用情况。
+
+# 用法
+
+`du`命令的语法为：
+
+```sh
+$ du [options] [name...]
+```
+
+其中，*name*是目录或文件的名称。
+当指定一个或多个文件的名称时，`du`将显示这些文件所使用的存储空间总量。在大多数系统上，输出将以**1KB**为单位。
+
+如下输出：
+
+```sh
+$ du /etc/passwd
+4   /etc/passwd
+```
+
+输出表明该文件占用了**4KB**的磁盘空间。
+
+----------
+
+# 选项
+
+|选项|含义|解释|
+|---|
+|-a|all|显示每个目录和文件的大小|
+|-c|count|在输出末尾显示总量|
+|-h|human-readable|适合人类阅读|
+|-k|KB|使用1KB为单位|
+|-s|sum|只显示总和|
+ 
+ 
+
+----------
+
+# Reference
+
+[1] Haeley Hahn. Unix & Linux 大学教程[M]. 张杰良, 译. 北京:清华大学出版社, 2010.1:626-628.

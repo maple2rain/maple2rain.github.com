@@ -1,0 +1,186 @@
+title: Sublime配置
+date: 2017-03-18 22:44:16
+updated: 2017-05-07 16:18:33
+tags:
+- Tool
+categories:
+- Study
+- Computer
+- Tools
+---
+# 1 安装
+
+可从[官网](https://www.sublimetext.com/)进入Download界面根据平台选择不同版本进行安装。
+
+# 2 注册
+
+在工具栏`Help->Enter Licence`中输入注册码(3126版)，可用注册码示例如下：
+
+```c
+—– BEGIN LICENSE —–
+Michael Barnes
+Single User License
+EA7E-821385
+8A353C41 872A0D5C DF9B2950 AFF6F667
+C458EA6D 8EA3C286 98D1D650 131A97AB
+AA919AEC EF20E143 B361B1E7 4C8B7F04
+B085E65E 2F5F5360 8489D422 FB8FC1AA
+93F6323C FD7F7544 3F39C318 D95E6480
+FCCC7561 8A4A1741 68FA4223 ADCEDE07
+200C25BE DBBC4855 C4CFB774 C5EC138C
+0FEC1CEF D9DCECEC D3A5DAD1 01316C36
+—— END LICENSE ——
+```
+
+# 3 插件配置
+
+安装`Package Control`组件：
+
+- 按**Ctrl-`**调出Console(避免热键冲突)
+- 粘贴以下嗲吗到命令行并回车
+
+```
+import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())
+```
+- 重启sublime
+- 如果在`Perferences->package settings`中看到`package control`这一项，则安装成功
+
+使用`Package Control`安装插件
+
+- 按下`Ctrl+Shift+P`调出命令面板
+- 输入`install` 调出 `Install Package` 选项并回车，然后在列表中选中要安装的插件
+
+常用插件：
+
+- Alignment(对齐)
+- AutoFileName(补全文件名)
+- Emmet(前端必备)
+- MarkDown Editing(编写markdown文件格式化)
+- ConvertToUTF8(中文转UTF8)
+- OmniMarkupPreviewr(实时显示markdown)
+
+# 4 中文输入法问题(Fedora 25, 输入法fcitx)
+
+编写文件`sublime_imfix.c`
+
+```
+/*
+sublime-imfix.c
+Use LD_PRELOAD to interpose some function to fix sublime input method support for linux.
+By Cjacker Huang &lt;jianzhong.huang at i-soft.com.cn&gt;
+gcc -shared -o libsublime-imfix.so sublime_imfix.c  `pkg-config --libs --cflags gtk+-2.0` -fPIC
+LD_PRELOAD=./libsublime-imfix.so sublime_text
+*/
+#include <gtk/gtk.h>
+#include <gdk/gdkx.h>
+typedef GdkSegment GdkRegionBox;
+struct _GdkRegion
+{
+  long size;
+  long numRects;
+  GdkRegionBox *rects;
+  GdkRegionBox extents;
+};
+GtkIMContext *local_context;
+void
+gdk_region_get_clipbox (const GdkRegion *region,
+            GdkRectangle    *rectangle)
+{
+  g_return_if_fail (region != NULL);
+  g_return_if_fail (rectangle != NULL);
+  rectangle->x = region->extents.x1;
+  rectangle->y = region->extents.y1;
+  rectangle->width = region->extents.x2 - region->extents.x1;
+  rectangle->height = region->extents.y2 - region->extents.y1;
+  GdkRectangle rect;
+  rect.x = rectangle->x;
+  rect.y = rectangle->y;
+  rect.width = 0;
+  rect.height = rectangle->height; 
+  //The caret width is 2; 
+  //Maybe sometimes we will make a mistake, but for most of the time, it should be the caret.
+  if(rectangle->width == 2 && GTK_IS_IM_CONTEXT(local_context)) {
+        gtk_im_context_set_cursor_location(local_context, rectangle);
+  }
+}
+//this is needed, for example, if you input something in file dialog and return back the edit area
+//context will lost, so here we set it again.
+static GdkFilterReturn event_filter (GdkXEvent *xevent, GdkEvent *event, gpointer im_context)
+{
+    XEvent *xev = (XEvent *)xevent;
+    if(xev->type == KeyRelease && GTK_IS_IM_CONTEXT(im_context)) {
+       GdkWindow * win = g_object_get_data(G_OBJECT(im_context),"window");
+       if(GDK_IS_WINDOW(win))
+         gtk_im_context_set_client_window(im_context, win);
+    }
+    return GDK_FILTER_CONTINUE;
+}
+void gtk_im_context_set_client_window (GtkIMContext *context,
+          GdkWindow    *window)
+{
+  GtkIMContextClass *klass;
+  g_return_if_fail (GTK_IS_IM_CONTEXT (context));
+  klass = GTK_IM_CONTEXT_GET_CLASS (context);
+  if (klass->set_client_window)
+    klass->set_client_window (context, window);
+  if(!GDK_IS_WINDOW (window))
+    return;
+  g_object_set_data(G_OBJECT(context),"window",window);
+  int width = gdk_window_get_width(window);
+  int height = gdk_window_get_height(window);
+  if(width != 0 && height !=0) {
+    gtk_im_context_focus_in(context);
+    local_context = context;
+  }
+  gdk_window_add_filter (window, event_filter, context); 
+}
+```
+
+首先安装gtk-2.0
+```sh
+$ sudo dnf install libgnomeui-devel -y
+```
+
+编译
+
+```c
+$ gcc -shared -o libsublime-imfix.so sublime_imfix.c `pkg-config --libs --cflags gtk+-2.0` -fPIC
+```
+
+直接运行即可
+
+```sh
+$ LD_PRELOAD=./libsublime-imfix.so sublime_text
+```
+
+为方便执行，可将其别名写入`.bashrc`中,前提是将libsublime-imfix.so 移动到/opt下面去
+
+```sh
+alias sublime_text='LD_PRELOAD=/opt/libsublime-imfix.so sublime_text'
+```
+
+# 5 实用配置
+
+进入`Perferences->Settings`，在`User`一栏设置用户属性，如：
+
+```
+"font_face": "Microsoft YaHei",//设置字体为微软雅黑
+"font_size": 13.0,//设置字体大小为13pt
+"highlight_line": true,//设置当前编辑行高亮
+"ignored_packages":
+[
+    //Vintage     //注释代表开启vi模式
+],
+"line_padding_bottom": 1,//行后间距1pt
+"line_padding_top": 1,//行前间距1pt
+"tab_size": 4,//设置tab键为4个空格
+"word_wrap": "auto",//设置自动换行
+"save_on_focus_lost": true,//焦点丢失后自动保存
+"show_encoding": true,//显示当前文件编码，如C文件
+```
+
+# Reference
+
+[1] [Sublime Text 3常用插件安装](http://www.cnblogs.com/JSONBEAN/p/5894697.html)
+[2] [解决sublime test3在fedora22下不能输入中文的问题](https://www.zybuluo.com/shui8023/note/169334)
+[3] [转 Sublime Text 3 3126 注册码](http://blog.csdn.net/wind520/article/details/52717070)

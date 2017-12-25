@@ -1,0 +1,189 @@
+title: 窗口
+date: 2017-01-05 16:22:30
+updated: 2017-01-05 16:30:17
+tags:
+- Linux Terminal
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Terminal
+---
+## 1 WINDOW结构
+
+标准屏幕**stdscr**只是**WINDOW**结构的一个特例，就像标准输出**stdout**是文件流的一个特例一样。
+该结构通常定义在**curses.h**中，虽然研究该结构是有意义的，但程序应该永远都不要直接访问它，因为不同版本实现不同。
+
+## 2 创建和销毁
+
+```c
+#include <curses.h>
+/**
+ * @brief       创建一个新的窗口
+ * @parameter   num_of_lines:   指定窗口行数
+ *              num_of_cols :   指定窗口列数
+ *              start_y     :   指定屏幕开始位置行数
+ *              start_x     :   指定屏幕开始位置列数    
+ * @return      返回一个指向新窗口的指针，失败时返回NULL
+ * @description 所有的窗口范围都必须在当前屏幕范围之内，否则函数将调用失败；
+ *              新窗口完全独立于所有已存在的窗口，默认情况下，它被放置在任何已有窗口之上，覆盖(但不是改变)他们的内容。
+ */
+WINDOW *newwin(int num_of_lines, int num_of_cols, int start_y, int start_x);
+
+/**
+ * @brief       删除一个先前通过newwin函数创建的窗口
+ * @description 调用newwin函数时可能会给新窗口分配内存，所以需要释放他们，但不要自己删除stdscr和curscr
+ */
+int delwin(WINDOW *window_to_delete);
+```
+
+## 3 通用函数
+
+可以为某些屏幕输出函数添加一些前缀使其成为通用函数。
+
+- 前缀w用于窗口
+
+    必须在该函数的参数表的最前面增加一个**WINDOW**指针参数。
+
+- 前缀mv用于光标移动
+
+    必须在该函数的参数表的最前面增加两个参数，分别是纵坐标y和横坐标x。
+
+- 前缀mvw用于在窗口中移动光标
+
+    必须在该函数的参数表最前面添加三个参数，分别是**WINDOW**指针、y和x坐标。
+
+- 例子
+
+    ```c
+    int addch(const chtype char);
+    int waddch(WINDOW *window_pointer, const chtype char);
+    int mvaddch(int y, int x, const chtype char);
+    int mvwaddch(WINDOW *window_pointer, int y, int x, const chtype char);
+    ```
+
+## 4 移动和更新窗口
+
+- 基本API
+
+    |                           原型                          |                                                                       说明                                                                       |
+    |---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+    | int mvwin(WINDOW *window_to_move, int new_y, int new_x) | 移动一个窗口(仅限屏幕内)                                                                                                                         |
+    | int wrefresh(WINDOW *window_ptr)                        | refresh的通用版本                                                                                                                                |
+    | int wclear(WINDOW *window_ptr)                          | clear的通用版本                                                                                                                                  |
+    | int touchwin(WINDOW *window_ptr)                        | 通知指针参数指向的窗口内容发生改变，则在下次调用wrefresh函数时必须重新绘制该窗口，即使用户实际上并未修改该窗口中的内容；通常用于多窗口重叠的情况 |
+    | int werases(WINDOW *window_ptr)                         | erases的通用版本                                                                                                                                 |
+    | int scrollok(WINDOW *window_ptr, bool scroll_flag)      | 如果参数是true，则允许卷屏                                                                                                                       |
+    | int scroll(WINDOW *window_ptr)                          | 将窗口内容上卷一行                                                                                                                               |
+
+## 5 优化屏幕刷新
+
+```c
+int wnoutrefresh(WINDOW *window_ptr);
+int doupdate(void);
+```
+
+- 说明
+
+    **wnoutrefresh**函数决定把那些字符发送到屏幕上，但它并不是真正地发送这些字符，真正将更新发送到终端的工作有**doupdate**函数来完成。
+    如果只是调用**wnoutrefresh**函数，然后立刻调用**doupdate**函数，则它的效果与直接调用**wrefresh**完全一样。
+    但如果想重新绘制多个窗口，则可以按正确的顺序分别调用**wnoutrefresh**函数，然后在调用最后一个**wnoutrefresh**函数之后调用一次**doupdate**函数即可。
+    这种方式允许**curses**依次为每个窗口执行屏幕更新计算工作，最后仅把最终的更新结果输出到屏幕上，从而最大限度地减少**curses**需要发送的字符数目。
+
+# 6 子窗口
+
+```c
+WINDOW *subwin(WINDOW *parent, int num_of_lines, int num_of_cols, int start_y, int start_x);
+```
+
+事实上，子窗口的行为与新窗口的非常相似，两者之间的一个重要区别是：子窗口没有自己独立的屏幕字符存储空间，他与父窗口共享同一字符存储空间，即对子窗口中内容的任何修改都会反映到父窗口中。
+
+子窗口最主要的用途是，提供了一种简洁的方式来卷动另一窗口里的部分内容。
+
+- 注意
+    - 使用子窗口有个强加的限制：在应用程序刷新屏幕之前必须先对父窗口调用**touchwin**函数。
+    - 子窗口实际上更新的是父窗口的字符数据，所以删除了子窗口之后，窗口界面未改变。
+
+## 7 彩色显示
+
+**curses**函数库对颜色的支持有些与众不同，即字符颜色的定义及其背景色的定义并不完全独立。
+必须同时定义一个字符的前景色和背景色，称其为**颜色组合(color pair)**。
+
+在使用该函数库的颜色功能之前，需检查终端是否支持彩色显示功能，然后对例程进行初始化。
+
+- 检测函数
+
+    ```c
+    bool has_colors(void);//支持时返回true
+    int start_color(void);//成功初始化时返回OK
+    COLOR_PAIRS     //表示终端所能支持的颜色组合数目的最大数值
+    COLOR           //可用颜色数目的最大值，一般只有8种
+    ```
+
+在把颜色作为属性使用之前，首先需要对颜色组合进行初始化，而对颜色属性的访问是通过**COLOR_PAIR**函数来完成的。
+
+- 设置属性函数
+
+    ```c
+    /**
+     * @brief       将颜色组合定义为pair_number，foreground是前景色，background是背景色
+     * @parameter   pair_number将作为记录的数字，颜色以"COLOR_"为前缀，如"COLOR_RED"
+     */
+    int init_pair(short pair_number, short foreground, short background);
+
+    /**
+     * @brief       返回值将作为属性被设置到指定的地方
+     * @parameter   pair_number是被定义的颜色组合
+     * @description 可以与其他属性进行按位或来附加多重属性
+     */
+    int COLOR_PAIR(int pair_number);
+    ```
+
+- 可支持颜色
+
+    |      定义     |  颜色  |
+    |---------------|--------|
+    | COLOR_RED     | 红色   |
+    | COLOR_GREEN   | 绿色   |
+    | COLOR_YELLOW  | 黄色   |
+    | COLOR_WHITE   | 白色   |
+    | COLOR_BLUE    | 蓝色   |
+    | COLOR_MAGENTA | 洋红色 |
+    | COLOR_CYAN    | 青色   |
+    | COLOR_BLACK   | 黑色   |
+
+### 7.1 重新定义颜色
+
+```c
+/**
+ * @brief       将一个已有的颜色(范围从0到COLORS)以新的亮度值重新定义，亮度值的范围为0~1000
+ * @parameter   red,green,blue分别是三基色亮度值
+ */
+int init_color(short color_number, short red, short green, short blue);
+```
+
+## 8 pad
+
+在编写更高级的curses程序时，有时需要先建立一个逻辑屏幕，然后再把他当全部或部分内容输出到物理屏幕上。有时，如果有一个尺寸大于物理屏幕的逻辑屏幕，一次只显示该逻辑屏幕的某个部分，其效果往往会更好。
+
+```c
+/**
+ * @brief       创建一个逻辑屏幕，行列由参数决定
+ * @description pad由delwin函数来删除
+ */
+WINDOW *newpad(int number_of_lines, int number_of_columns);
+```
+
+pad使用不同的函数来执行刷新操作，因为一个pad并不局限于某个特定的屏幕位置，所以必须指定希望放到屏幕上的pad范围及其放置在屏幕上的位置。使用下列函数来实现刷新。
+
+```c
+/**
+ * @brief       将pad从坐标(pad_row, pad_column)开始的区域写到屏幕上指定的显示区域，
+                该显示区域的范围从坐标(screen_row_min, screen_col_min)到(screen_row_max, screen_col_max)。
+ */
+int prefresh(WINDOW *pad_ptr, int pad_row, int pad_column, 
+             int screen_row_min, int screen_col_min,
+             int screen_row_max, int screen_col_max);
+```

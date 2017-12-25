@@ -1,0 +1,111 @@
+title: 迭代器
+date: 2016-10-30 13:34:01
+updated: 2017-02-21 14:56:43
+categories:
+- Study
+- Computer
+- PL
+- C++
+- Class
+---
+
+## 1 迭代器介绍
+
+- 类似于指针类型，迭代器提供了对对象的间接访问
+- 迭代器可以访问某个元素，也能从一个元素移动到另外一个元素
+- 迭代器有有效和无效之分
+    + 有效的迭代器指向某个元素据欧哲指向容器中尾元素的下一位置
+    + 其他情况都属于无效
+
+## 2 使用迭代器
+
+有迭代器的类型的对象同时拥有返回迭代器的成员：
+
+- begin()
+    + 负责返回指向第一个元素的迭代器
+- end()
+    + 负责返回指向容器尾元素的下一位置的迭代器
+    + 该迭代器只是的是一个本不存在的尾后(off the end)元素
+- 如果容器为空，则*begin*和*end*返回的是同一个迭代器
+- size()
+    + 返回迭代器元素个数
+
+**c++11**新标准引入了两个函数，分别是*cbegin*和*cend*，分别返回常量迭代器的第一个元素和最后一个元素。
+
+
+### 2.1 迭代器运算符
+
+|     运算符     |                            描述                            |
+|----------------|------------------------------------------------------------|
+| *iter          | 返回迭代器iter所指元素的引用                               |
+| iter->mem      | 解引用iter并获取该元素的mem成员                            |
+| ++iter         | 令iter指示容器中的下一个元素                               |
+| --iter         | 令iter指示容器中的上一个元素                               |
+| iter1 == iter2 | 判断两个迭代器是否相等，是则为true                         |
+| iter1 != iter2 | 判断两个迭代器是否不相等，是则为true                       |
+| iter + n       | 迭代器向前移动了n个位置，或是尾元素下一位置                |
+| iter - n       | 迭代器向后移动了n个位置，或是尾元素下一位置                |
+| iter += n      | 迭代器加法复合赋值语句                                     |
+| iter -= n      | 迭代器减法复合赋值语句                                     |
+| iter1 - iter2  | 计算两个迭代器的距离                                       |
+| \>,>=,<,<=      | 迭代器度关系运算符,距离类型是difference_type的带符号整形数 |
+
+### 2.2 迭代器类型
+
+拥有迭代器的标准库类型使用*iterator*和*const_iterator*来表示迭代器的类型：
+
+```cpp
+vector<int>::iterator it;           //it能读写vector<int>的元素
+vector<int>::const_iterator itConst;//itConst只能读元素，不能写元素
+```
+
+## 3 迭代器例子
+
+### 3.1 二分查找
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main(void)
+{
+    vector<char> str;
+    vector<char>::iterator it;//迭代器
+
+    for (int i = 0; i < 26; ++i)//为str添加字母表
+        str.push_back('a' + i);
+    for (it = str.begin(); it != str.end(); ++it)//依次输出字母表中的内容
+        cout << *it;
+    cout << endl;
+
+    auto begin = str.begin(), end = str.end();
+    auto mid = str.begin() + (end - begin) / 2;//初始状态的中间节点
+    char ch;
+
+    cin >> ch;//输入待检测字符
+    while (mid != end && *mid != ch) {//二分查找
+        if (ch < *mid)
+            end = mid;
+        else
+            begin = mid + 1;
+        mid = begin + (end - begin) / 2;
+    }
+    if (mid != str.end()) {
+        cout << "*mid is " << *mid << endl;//输出最终定位查找的字符
+        if (*mid != ch)
+            cout << "find error" << endl;
+    }
+    if (mid == str.end()) {
+        cout << "find error" << endl;
+    }
+    system("pause");
+    return 0;
+}
+```
+- 执行结果
+    ![title](../post_img/58162a6eab644164d4005257)
+## 4 注意
+
+但凡是使用了迭代器的循环体，都不要向迭代器所属的容器添加元素，因为这会造成迭代器失效！

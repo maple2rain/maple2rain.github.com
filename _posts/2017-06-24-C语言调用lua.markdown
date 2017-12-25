@@ -1,0 +1,16 @@
+title: C语言调用lua
+date: 2017-06-24 15:50:57
+updated: 2017-06-24 15:52:10
+categories:
+- Study
+- Computer
+- PL
+- Lua
+---
+# 编译
+
+在执行编译时，需要指定静态库`lua.a`及`-lm`选项，如下编译*test.c*：
+
+```sh
+$ gcc test.c -llua -lm
+```

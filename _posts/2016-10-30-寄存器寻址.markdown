@@ -1,0 +1,40 @@
+title: 寄存器寻址
+date: 2016-10-30 13:40:40
+updated: 2017-02-21 16:11:48
+tags:
+- ADR
+categories:
+- Study
+- Computer
+- PL
+- Asm
+- 80x86
+- LocateMode
+---
+
+## 1 HLA中的寄存器访问
+
+```
+mov(source, destination);
+```
+
+- 上述指令将操作数*source*中的数据复制到操作数*destination*
+- 8位、16位和32位寄存器都可以作为该指令的有效操作数
+- 要求两个操作数位数相同
+
+## 2 Gas中的寄存器访问
+
+**Gas**中的每个寄存器访问要用**%**前缀进行引用。
+
+```asm
+mov %ax, %bx    //将AX的内容传送到BX
+```
+
+## MASM和TASM中的寄存器访问
+
+**MASM**和**TASM**汇编器使用的语法与**Gas**类似，只不过源和目标操作数需互换位置。
+
+```
+mov destination, source
+mov ax, bx      ;将AX的内容传送到BX
+```

@@ -1,0 +1,108 @@
+title: 主机信息
+date: 2016-10-30 16:00:45
+updated: 2017-02-21 15:12:09
+tags:
+- LinuxAPI
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Environment
+---
+## 1 获取网络名
+
+如果系统安装了网络组件，可以通过**gethostname**函数获取网络名
+
+- 函数原型
+
+```c
+/**
+ * name     :用于存储主机名
+ * namelen  :name长度
+ * 返回值   :成功返回0，否则返回-1
+ * 头文件   :unistd.h
+ */
+int gethostname(char *name, size_t namelen);
+```
+
+## 2 更多详细信息
+
+**uname**系统调用可以获得关于主机更多的信息。
+**uname**函数把主机写入**name**参数指向的结构。
+
+- utsname结构
+
+    |   utsname成员   |     说明     |
+    |-----------------|--------------|
+    | char sysname[]  | 操作系统名   |
+    | char nodename[] | 主机名       |
+    | char release[]  | 系统发行级别 |
+    | char version[]  | 系统版本号   |
+    | char machine[]  | 硬件类型     |
+
+- 函数原型
+
+```c
+/**
+ * name     :ustname结构指针，用于存储信息
+ * 返回值   :成功返回非负整数，否则返回-1
+ * 头文件   :sys/utsname.h
+ */
+int uname(struct ustname *name);
+```
+
+- 例子
+
+```c
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    char computer[256];
+    struct utsname uts;
+
+    if((gethostname(computer, 255) != 0 ) || uname(&uts) < 0){
+        fprintf(stderr, "Could not get host information!\n");
+        exit(0);
+    }
+
+    /*打印信息*/
+    printf("Computer host name is %s\n", computer);
+    printf("System is %s on %s hardware\n", uts.sysname, uts.machine);
+    printf("Nodename is %s\n", uts.nodename);
+    printf("Version is %s, %s\n", uts.release, uts.version);
+
+    exit(0);
+}
+```
+
+- 执行结果
+    ![执行结果](../post_img/5815a910ab644162e10045dc)
+    可以看到，版本字符串包含了内核编译日期。    
+
+## 3 主机唯一标识符
+
+每台主机的唯一标识符可以通过**gethostid**函数取得。
+
+**gethostid**函数返回与主机对应的一个唯一值。
+许可证管理者利用他来确保软件程序只能在拥有合法许可证的机器上运行。
+
+    在Sun工作站上，该函数返回计算机生产时设置在非易失性存储器的一个数字，他对系统硬件来说是唯一的。
+    在Linux等系统中，返回一个基于该机器因特网地址的值，但这对许可证管理者来说还不够安全
+
+
+- 函数原型
+
+```c
+/**
+ * 返回值  :主机唯一标识符
+ * 头文件  :unistd.h
+ */
+long gethostid(void);
+```
+

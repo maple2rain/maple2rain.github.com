@@ -1,0 +1,50 @@
+title: 设计Min栈
+date: 2017-02-09 20:52:14
+updated: 2017-02-09 21:06:35
+categories:
+- Study
+- Algorithm
+- OL
+---
+> 设计一个栈的数据结构，使得min、push、以及pop的时间复杂度都是O(1)
+
+## 观察
+
+对于普通的栈，push和pop都是O(1)的时间，但是求最小值，则需要扫描栈内的所有元素，时间复杂度为O(n)。所以需要一个辅助空间来记录最小值，也许是一个变量，也许是另一个栈，或者是数组、哈希表等。
+
+## 思路
+
+注意到最小值将伴随进出栈的操作而改变，常数空间满足不了这种情况，而需要一个线性的空间，比如说新栈存储最小值，使得记录的最小值跟随着原有栈顶元素的变化而改变。当新元素入栈时，同时将当前最小值压入辅助栈。元素出栈时，辅助栈的栈顶也出栈，这样辅助栈在每次出入栈时均保留当前的最小值。如果求栈元素的最小值，只要查看辅助栈的栈顶元素即可。
+
+```java
+class MinStack {
+    Stack<Integer> s;
+    Stack<Integer> sHelper;
+    
+    MinStack() {
+        s = new Stack<Integer>();
+        sHelper = new Stack<Integer>();
+    }
+    
+    public void push(int val) { 
+        if(sHelper.empty() || sHelper.peek() > val)
+            sHelper.push(val);
+        else
+            sHelper.push(sHelper.peek());
+        s.push(val);
+    }
+    
+    public int pop() throws EmptyStackException {
+        if(s.empty())
+            throw new EmptyStackException("");
+        sHelper.pop();
+        return s.pop();
+    }
+    
+    public int min() throws EmptyStackException {
+        if(sHelper.empty())
+            throw new EmptyStackException("");
+        return sHelper.peek();
+    }
+}
+```

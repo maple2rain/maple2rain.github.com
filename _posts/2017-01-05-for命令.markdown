@@ -1,0 +1,194 @@
+title: for命令
+date: 2017-01-05 16:46:30
+updated: 2017-01-05 17:02:29
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Structure  Stament
+---
+## 1 for命令
+
+**for**命令允许创意一个遍历一系列值的循环。
+每个迭代都通过一个该系列中的值执行一组预定义的命令。
+
+## 2 基本格式
+
+```sh
+for var in list
+do
+    commands
+done
+```
+
+或
+
+```sh
+for var in list; do
+    commands
+done
+```
+
+- **list**
+
+    该参数提供了迭代要用的一系列值，可以通过几种不同的途径来指定列表中的值。
+
+    + **直接将所有值都列出来，以空格作为分隔符**
+
+        ```sh
+        for test in a b c d e f g
+        do 
+            echo "The test is $test"
+        done
+        ```
+        执行脚本将有以下输出：
+        ![](../post_img/586e07e6ab6441209e00478d)
+
+    + **读取列表中的复杂值**
+
+        ```sh
+        for test in I don't know if this'll work
+        do
+            echo "word: $test"
+        done
+        ```
+        ![](../post_img/586e07efab6441236e0046bd)
+        上述的情况是，**shell**看到了列表值中的单引号并尝试使用它们来定义一个单独的数据值。
+        <font color=red>可以使用转义字符将单引号转义或使用双引号来定义用到单引号的值。
+        同时，双引号还可以将单独的数据值中有空格的数据圈起来，使其能用空格。</font>
+
+        ```sh
+        for test in I don\'t know if "this'll" work
+        do
+            echo "word: $test"
+        done
+        ```
+        ![](../post_img/586e0800ab6441236e0046c3)
+
+    + **从变量读取列表**
+
+        可以将一系列之都集中存储在一个变量中。
+
+        ```sh
+        list="I don\'t know if this\'ll work"
+        list=$list" really"
+
+        for test in $list
+        do
+            echo "word: $test"
+        done
+        ```
+        ![](../post_img/586e0819ab6441236e0046cc)
+        可以看到，代码还用了另一个赋值语句来向变量**list**包含的已有列表添加一个值，这是向变量中存储的已有文本字符串尾部添加文本的一个常用方法。
+
+    + **从命令读取列表**
+
+        可以用反引号来执行任何能产生输出的命令，然后在**for**命令中使用该命令的输出。
+
+        ```sh
+        file="test.txt"
+
+        for directory in `cat $file`
+        do
+            echo "The directory's name is $directory"
+        done
+        ```
+
+        ![](../post_img/586e0825ab6441209e00479b)
+        上述例子在反引号使用了**cat**命令来输出文件**test.txt**的内容。
+        **for**命令以每次一行的方式遍历了**cat**命令的输出，但如果每一行中含有多个以空格分隔的字符串，**for**命令仍然会将每个字符串当做单独的值。
+
+    + **用通配符读取目录**
+
+        可以用**for**命令来自动遍历满是文件的目录。
+        进行此操作时，需要在文件名或路径名中使用通配符。
+        它会强制**shell**使用**文件扩展匹配(file globbing)**。文件扩展匹配是生成匹配指定的通配符的文件名或路径名的过程。
+
+        ```sh
+        for file in /home/maple/test*
+        do
+            if [ -d "$file" ]
+            then 
+                echo "$file is a directory"
+            elif [ -f "$file" ]
+            then 
+                echo "$file is a file"
+            fi
+        done
+        ```
+        ![](../post_img/586e082fab6441209e00479d)
+        <font color=red>变量加双引号的原因是避免文件名含有空格而导致**if**语句参数出错。</font>
+
+## 3 更改字段分隔符
+
+**for**命令一般分隔字符串是根据一个特殊的环境变量**IFS**——内部字段分隔符——来分隔的。
+默认情况下，**shell**会将下列字符当做字段分隔符：
+
+- 空格
+- 制表符
+- 换行符
+
+若想更改字段分隔符，可以直接修改**IFS**的值，如：
+
+```sh
+IFS=$'\n'
+```
+
+此时**shell**将会只以换行符作为分隔符。
+
+### 3.1 警告
+
+在处理长脚本时，可能在一个地方修改**IFS**值，然后在其他地方需要恢复，可以用下列方式：
+
+```sh
+IFS.OLD=$IFS
+IFS=$'\n'
+<use the new IFS value in code>
+IFS=$IFS.OLD
+```
+
+这样就可以先将之前的**IFS**值保留下来以备后期恢复。
+也可以自定义**IFS**值为其他分隔符，如冒号：
+
+```sh
+#指定分隔符为冒号
+IFS=:
+
+#指定分隔符为换行符、冒号、分号和双引号
+IFS=$'\n:;'"
+```
+
+## 4 C语言风格的for命令
+
+### 4.1 格式
+
+```sh
+for (( variable assignment ; condition; iteration process ))
+do
+    commands
+done
+```
+
+一个简单的例子：
+
+```sh
+for (( i = 1; i < 10; i++ ))
+do 
+    echo "test"
+done
+```
+
+上述例子将循环输出**test**10次。
+
+### 4.2 注意
+
+- 给变量赋值时可以有空格
+- 条件中的变量不以**$**开头
+- 迭代过程的算是未用**expr**表达式
+- 允许迭代使用多个变量
+- 只能定义一种条件语句

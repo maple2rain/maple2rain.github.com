@@ -1,0 +1,260 @@
+title: Linux命令之dd
+date: 2017-05-13 21:27:17
+updated: 2017-05-14 11:03:41
+tags:
+- Linux Command
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- Command
+---
+> `dd` 是一个很有用的 Linux/Unix 命令，它可以用来进行设备之间的**裸读写**。所谓的**裸读写**就是它不理会文件系统，直接越过文件系统对物理设备进行读写。所以它可以进行很多**拷贝命令**(copy/cp)无法做或不方便做的事情(备份/恢复硬盘主引导扇区)。
+此外，还可以利用该命令制作系统U盘系统启动盘。
+
+## 用法
+
+```
+$ dd --help
+Usage: dd [OPERAND]...
+   or:  dd OPTION
+Copy a file, converting and formatting according to the operands.
+```
+
+## 参数
+
+|参数名|描述|
+|---|
+|bs=BYTES|一次读写BYTES个字节，即指定读入/输出块的大小|
+|cbs=BYTES|一次转换BYTES个字节，即指定转换缓冲区大小|
+|conv=CONVS|用指定的参数列表转换文件，以逗号隔开各个参数，详见[参数符号表](#convertid)|
+|ibs=BYTES|一次读入BYTES个字节，即指定一个读入块大小为BYTES个字节。默认大小为512|
+|iflag=FLAGS|根据参数列表进行读取，详见[标志](#flagsid)|
+|obs=BYTES|一次输出BYTES个字节，即指定一个输出块大小为BYTES个字节。默认大小为512|
+|oflag=FLAGS|根据参数列表进行输出，详见[标志](#flagsid)|
+|if=FILE|FILE为输入文件名，缺省为标准输入，即指定源文件|
+|of=FILE|FILE为输出文件名，缺省为标准输出，即指定目标文件|
+|skip=N|从输入文件开头跳过N个块后再开始复制，块的大小为ibs|
+|seek=N|从输出文件开头跳过N个块后再开始复制，块的大小为obs|
+|count=N|仅拷贝N个块，块的大小为ibs|
+|status=LEVEL|LEVEL用于指定输出信息的级别：<br>`none`表示除错误信息外不输出其他信息，即只输出错误信息<br>`noxfer`表示不输出最终的执行结果<br>`progress`表示定期显示转换统计数据|
+
+## 可用参数
+
+在上述参数中的`N`和`BYTES`，他们可以接数字加以下后缀：
+|后缀|数值|
+|---|
+|c|1|
+|w|2|
+|b|512|
+|kB|1000|
+|K|1024|
+|MB|1000 * 1000|
+|M|1024 * 1024|
+|xM|M|
+|GB|1000 * 1000 * 1000|
+|G|1024 * 1024 * 1024|
+此外还有T, P, E, Z, Y，他们都以相同的方式表达数据的大小。
+如：
+```sh
+# 表示块大小为1c，即1字节
+$ dd bs=1c if=inputfile of=outputfile
+# 表示块大小为2K，即2K字节，即2 * 1024字节
+$ dd bs=2K if=inputfile of=outputfile
+```
+
+## 参数符号表 {#convertid}
+
+|符号|说明|
+|---|
+|ascii|从EBCDIC转换至ASCII|
+|ebcdic|从ASCII转换至EBCDIC|
+|ibm|从ASCII转换至alternate EBCDIC|
+|block|将每一块大小当成是cbs，不足部分用空格填充|
+|unblock|将每一块大小当成是cbs，并使用换行符替代空格|
+|lcase|把大写字符转换为小写字符|
+|ucase|把小写字符转换为大写字符|
+|sparse|对于非空块，尝试寻找一个输出块进行输出，而不是直接写入|
+|swab|交换输入的每对字节|
+|sync|将每个输入块填充到ibs个字节，不足部分用空格而不是空字符(NUL)补齐|
+|excl|如果输出文件已经存在，则失败|
+|nocreat|如果输出文件不存在，则失败，即只覆盖存在的目标文件，而不新建一个输出文件作为目标文件|
+|notrunc|不截短输出文件|
+|noerror|遇到错误仍不停止|
+|fdatasync|结束程序之前就物理写出到设备|
+|fsync|和fdatasync一样，但同时写入元数据|
+
+
+## 标志 {#flagsid}
+
+|标志|说明|
+|---|
+|append|append模式(仅oflag有效)，即在输出文件末尾添加<br>建议使用`conv=notrunc`方式|
+|direct|对数据使用直接I/O方式|
+|directory|对于非文件夹，结果为失败|
+|dsync|对数据使用同步I/O|
+|sync|和dsync，但同时写入元数据|
+|fullblock|计算输入块的总数(仅iflag有效)|
+|nonblock|使用非阻塞I/O|
+|noatime|不更新access time|
+|nocache|不保留缓存，即在程序结束后请求释放缓存|
+|noctty|不从文件指定控制台?|
+|nofollow|不跟从符号连接|
+|skip_bytes|类似于`skip=N`，不过表示为跳过N个字节，以字节而不是以块为单位(仅iflag有效)|
+|seek_bytes|类似于`seek=N`，不过表示为跳过N个字节，以字节而不是以块为单位(仅oflag有效)|
+|count_bytes|类似于`count=N`，不过表示为拷贝N个字节，以字节而不是以块为单位(仅iflag有效)|
+
+## 显示进度
+
+查看进度的方法描述如下：
+
+> 
+Sending a USR1 signal to a running `dd` process makes it
+print I/O statistics to standard error and then resume copying.
+
+如每5秒输出进度，则有如下几种方法：
+
+```sh
+# 使用pkill命令向dd命令发送SIGUSR1信息
+$ sudo watch -n 5 pkill -USR1 ^dd$
+# 使用killall命令向dd命令发送SIGUSR1信息
+$ sudo watch -n 5 killall -USR1 dd
+# 类似脚本的方式，每5秒发送一次SIGUSR1信息
+$ sudo while killall -USR1 dd; do sleep 5; done
+# 通过读取进程列表来显示所有dd命令的进度，除去grep中的dd
+$ while (ps auxw |grep " dd " |grep -v grep |awk '{print $2}' |while read pid; do kill -USR1 $pid; done) ; do sleep 5; done
+```
+
+## 应用实例
+
+1. 将本地的/dev/sda1整盘备份到/dev/sdb1
+
+    ```sh
+    $ sudo dd if=/dev/sda1 of=/dev/sdb1
+    ```
+
+2. 将/dev/sda1全盘数据备份到指定文件/tmp/image
+
+    ```sh
+    $ sudo dd if=/dev/sda1 of=/tmp/image
+    ```
+    
+3. 将备份文件恢复到指定盘/dev/sda1
+
+    ```sh
+    $ sudo dd if=/tmp/image of=/dev/sda1
+    ```
+    
+4. 备份/dev/sda1全盘数据，并利用gzip工具进行压缩，保存到指定文件/tmp/image.gz
+
+    ```sh
+    $ sudo dd if=/dev/sda1 | gzip > /tmp/image.gz
+    ```
+    
+5. 将压缩的备份文件恢复到指定盘/dev/sda1
+
+    ```sh
+    $ sudo gzip -dc /tmp/image.gz | dd of=/dev/sda1
+    ```
+    
+6. 备份磁盘/dev/sda1开始的512个字节大小的MBR信息到指定文件/tmp/image
+
+    ```sh
+    $ sudo dd if=/dev/sda1 of=/tmp/image count=1 bs=512
+    ```
+    
+7. 拷贝内存内容到指定文件/tmp/mem.bin
+
+    ```sh
+    $ sudo dd if=/dev/mem of=/tmp/mem.bin bs=1024
+    ```
+
+8. 拷贝光盘内容到指定文件夹，并保存为文件/tmp/cd.iso
+    
+    ```sh
+    $ sudo if=/dev/cdrom(hdc) of=/tmp/cd.iso
+    ```
+
+9. 增加swap分区大小
+    
+    - 创建一个大小为256M的文件
+    ```sh
+    $ sudo dd if=/dev/zero of=/swapfile bs=1024 count=262144
+    ```
+
+    - 令这个文件为swap文件
+    ```sh
+    $ sudo mkswap /swapfile
+    ```
+    
+    - 启用该swap文件
+    ```sh
+    $ sudo swapon /swapfile
+    ```
+    
+    - 编辑/etc/fstab文件，使得在每次开机时自动加载该swap文件，在文件末尾添加下列描述：
+    ```sh
+    /swapfile    swap    swap    default   0 0
+    ```
+    
+10. 销毁磁盘/dev/sda1的数据
+
+    - 利用随机的数据填充硬盘，在某些必要的场合可以用来销毁数据
+    ```sh
+    $ sudo dd if=/dev/urandom of=/dev/sda1
+    ```
+    
+11. 测试硬盘的读写速度(通过观察命令的执行时间或执行进度信息)
+
+    - 测试硬盘读取速度
+    ```sh
+    $ sudo dd if=/root/1Gb.file bs=64k | dd of=/dev/null
+    ```
+    
+    - 测试硬盘写出速度
+    ```sh
+    $ sudo dd if=/dev/zero bs=1024 count=1000000 of=/tmp/1Gb.file
+    ```
+    
+12. 修复硬盘
+
+    - 当硬盘较长时间(一年以上)放置不使用后，磁盘上会产生magnetic flux point，当磁头读到这些区域时会遇到困难，并可能导致I/O错误。当这种情况影响到硬盘的第一个扇区时，可能导致硬盘报废。上边的命令有可能使这些数据起死回生。并且这个过程是安全、高效的。可以对任一磁盘做修复操作，如下是对/dev/sda1进行修复：
+    ```sh
+    $ sudo dd if=/dev/sda1 of=/dev/sda1
+    ```
+    
+> 补充
+`/dev/null`外号叫无底洞，你可以向它输出任何数据，它通吃，并且不会撑着！实际上他是空设备，也称为位桶（bit bucket）。任何写入它的输出都会被抛弃。如果不想让消息以标准输出显示或写入文件，那么可以将消息重定向到位桶。
+`/dev/zero`是一个输入设备，你可你用它来初始化文件。该设备无穷尽地提供0，可以使用任何你需要的数。他可以用于向设备或文件写入字符串0。
+
+## 制作U盘系统启动盘
+
+1. 首先，umount自己的U盘(注意，不是退出eject)
+
+    - 使用df命令查看U盘文件系统标识
+    ```sh
+    $ df -h
+    Filesystem      Size  Used Avail Use% Mounted on  
+/dev/sdb1       7.8G  880K  7.8G   1% /run/media/upan
+    ```
+    
+    - umount
+    ```sh
+    $ sudo umount /dev/sdb1
+    ```
+    此时，使用`sudo fdisk -l`可以看到有一个空余的盘块，其名称为`/dev/sdb`。
+    
+2. 使用dd命令进行刻录
+
+    ```sh
+    sudo dd bs=8M if=*.iso of=/dev/sdb && sync  
+    ```
+    **注意**：dd命令中的目标是sdb，没有标号。
+    
+
+## Reference
+
+[1] [dd命令详解](http://blog.csdn.net/liumang_d/article/details/3899462)
+[2] [linux下显示dd命令的进度](http://blog.csdn.net/xyz846/article/details/7367962)
+[3] [Linux使用技巧3--用dd命令制作U盘系统启动盘](http://blog.csdn.net/lincyang/article/details/43865385)

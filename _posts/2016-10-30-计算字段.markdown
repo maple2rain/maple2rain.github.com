@@ -1,0 +1,101 @@
+title: 计算字段
+date: 2016-10-30 09:33:26
+updated: 2017-02-21 15:16:26
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+## 1 计算字段的作用
+
+在表中存储的数据并不是应用程序所需要的。我们需要直接从数据库中检索出转换、计算或格式化过的数据；而不是检索出数据，然后再在客户机应用程序或报告程序中重新格式化。
+
+计算字段实际并不存在于数据库表中，而是在运行时在**SELECT**语句内创建的。
+
+### 1.1 字段 (field)
+字段基本上与列(column)的意思相同，经常互换使用，不过数据库列一般称为列，而术语*字段*则通常用在计算字段的连接上。
+
+## 2 拼接字段
+
+- 拼接
+    
+    将值联结到一起构成单个值。
+
+为了将多个列拼接起来，可以使用**Concat()**函数，**Concat**函数用于拼接多个串，每个串以**逗号**分隔开，如
+
+```SQL
+SELECT Concat(Name, '(', CountryCode, ')')
+From city
+ORDER BY CountryCode;
+```
+
+上述例子将实现把**Name**列与**CountryCode**列以**Name(CountryCode)**的方式拼接起来。
+
+### 2.1 MySQL的不同之处
+
+多数**DBMS**使用**+**或**||**来实现拼接，**MySQL**则使用**Concat()**函数来实现。
+当把**SQL**语句转换成**MySQL**语句时一定要注意这个区别。
+
+### 2.2 TRIM函数
+
+若想删除列中多于的空格，可使用**TRIM()**函数。
+
+- TRIM
+
+    用于删除串左右两边的空格，如**TRIM(** *Name* **)**将把**Name**列的值中左右两边的空格去掉。
+
+- LTRIM
+
+    用于删除串左边的空格。
+
+- RTRIM
+
+    用于删除串右边的空格。
+
+## 3 使用别名
+
+拼接后的字段并不能直接被客户机引用，因为实际上它是不存在于列中的，它没有名字，只是一个值。为了让客户机能够引用它，从而引进了了别名。
+
+- 别名(**alias**)
+
+    别名是一个字段或值的替换名，使用**AS**关键字赋予。
+
+### 3.1 例子
+
+```SQL
+SELECT Concat(Name, '(', CountryCode, ')') AS cityTitle
+From city
+ORDER BY CountryCode;
+```
+
+上述例子将拼接后的字段赋予新的名字**cityTitle**，这也是一个新的列名，任何客户机应用都可以按名引用这个列，就想它是一个实际的列一样。组合多个别名时使用**逗号**分隔开，如
+
+```SQL
+SELECT Concat(Name, '(', CountryCode, ')') AS cityTitle, Concat(Name, '(', ID , ')') AS IDTitle 
+From city
+ORDER BY CountryCode;
+```
+
+### 3.2 别名的其他用途
+
+
+常见的用途包括在实际的表列名包含不符合规定的字符（如空格）时重新命名它，在原来的名字含混或容易误解时扩充它，等等。
+
+### 3.3 执行算术运算
+
+如果表单中存在需要进行计算的多个列，则可以进行算术运算求值。
+
+- 例子
+
+```SQL
+SELECT quantity, price, quantity * price AS money
+From city
+ORDER BY CountryCode;
+```
+
+上述例子将计算**price**与**quantity**的乘积并将其以别名money表示，客户机可以直接引用**money**。
+
+- MySQL可支持算术操作符
+
+    目前，MYSQL可支持的运算包括**加减乘除**。

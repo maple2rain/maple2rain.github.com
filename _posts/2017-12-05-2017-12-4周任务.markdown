@@ -1,0 +1,29 @@
+title: 2017-12-4周任务
+date: 2017-12-05 08:51:09
+updated: 2017-12-06 09:08:24
+categories:
+- work
+- CVTE
+- Normal Intern Work
+- 2017
+- 2017.12
+---
+# 周任务
+
+1. 学习Electron相关知识，包括JavaScript，HTML，CSS。
+2. 协助DongleSDK的接入等问题。
+
+## 第一天
+
+1. 协助安卓接入DongleSDK JNI，并修复若干特定场景下可能出现的问题。
+2. 完成导出Leanote脚本。
+
+## 第二天
+
+1. 粗略看完W3CSchool上的JavaScript教程，并进一步了解JSON。
+
+## 第三天
+
+待办事项：
+1. 整理export.sh，完成移动图片文件及其他修改内容。
+2. 学习Node.js及Electron的Demo开发。

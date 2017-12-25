@@ -1,0 +1,74 @@
+title: 程序员的思维修炼——偈语
+date: 2017-02-16 12:08:38
+updated: 2017-04-28 15:57:32
+tags:
+- Thinking
+categories:
+- Life
+- Thinking
+---
+## 1 绪论
+
+- Software is created in your head
+- Only dead fish go with the flow(切忌随波逐流)
+- Everything is interconnected
+- There's something fundamental here
+- It's hard to articulate expertise
+
+## 2 从新手到专家的历程
+
+- Novices need recipes
+- Advanced beginners don't want the big picture
+- Competents can troubleshoot
+- Proficient practitioners can self-correct
+- Experts work from intuition
+- Rules ruin experts
+- Most people are advanced beginners
+- Intuition and pattern matching replace explicit knowledge
+- **I was just following orders!** doesn't work
+- Winners don't carry losers
+- One size does not fit all
+
+## 3 认识你的大脑
+
+- Everyone has good ideas, and seldom makes it
+- Beauty emerges from selection
+- Thinking makes it so
+
+## 4 利用右脑
+
+- Use cross-sensory feedback(利用多感观反馈)
+- Feed your brain
+- Limit cognitive interference
+- Get used to it
+- Many ideas are not verbalizable
+- Code is write-once, read-many
+- Accommodate different skill levels
+
+## 5 调试你的大脑
+
+- Unexpected events change the game
+- Never say never
+- Guess with explicit probabilities
+- You can't change people
+- Expectations color reality
+- It's all a trade-off
+
+## 6 主动学习
+
+- Objectives move you to your goal(目标任务使你更靠近目标)
+- SMART(Specific、Measurable、Achievable、Relevant、Time-boxed)
+- Time can't be created or destroyed, only allocated
+- Chance favors the prepared mind
+
+## 7 为了学习而玩耍
+
+- Fun is OK
+- **I don't know** is a good start
+- Don't just do something; stand there
+- Deadlines panic the mind
+- Perception is based on prediction
+
+## Reference
+
+[1] Andy Hunt. 程序员的思维修炼:开发认知潜能的九堂课[M]. 崔康,译. 北京:人民邮电出版社, 2011.1:1-205.

@@ -1,0 +1,20 @@
+title: SHOW语句
+date: 2016-10-30 09:31:17
+updated: 2017-02-21 15:16:07
+categories:
+- Study
+- DataBase
+- MySQL
+---
+
+SHOW作为显示信息的关键字，用途十分广大，下表为他可接的参数及其作用。
+
+## 1 SHOW表格
+|       参数      |           描述           |
+|-----------------|--------------------------|
+| STATUS          | 显示广泛的服务器状态信息 |
+| CREATE DATABASS | 显示创建特定数据库       |
+| CREATE TABLE    | 显示创建特定表           |
+| GRANTS          | 显示授予用户的安全权限   |
+| ERRORS          | 显示服务器错误           |
+| WARNINGS        | 显示服务器警告信息       |

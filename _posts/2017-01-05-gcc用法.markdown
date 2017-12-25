@@ -1,0 +1,76 @@
+title: gcc用法
+date: 2017-01-05 16:27:32
+updated: 2017-05-09 20:30:04
+tags:
+- Linux
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- Tools
+---
+## 1 前言
+gcc是GNU编译软件，主要用于C语言，其在Linux系统下十分流行
+
+## 2 gcc编译命令
+    gcc [选项] 源文件 [输出文件]
+
+## 3 gcc编译选项
+* 直接编译
+
+    `gcc main.c`
+
+执行完上面的命令后，会在当前目录下输出一个名为'a.out'的可执行文件。
+
+* -o
+    - gcc main.c -o main
+指定输出的可执行文件名称
+
+* -Wall
+    - gcc -Wall main.c -o main.c
+产生详细的编译过程信息，报告错误与警告。
+
+* -E
+    - gcc -E main.c > main.i
+产生预编译结果，并重定向到main.i文件中。
+
+* -S
+    - gcc -S main.c > main.s
+输出汇编代码，并重定向到main.s文件中。
+
+* -c
+    - gcc -c main.c
+阻止编译器创建一个完整的程序，此时编译main.c并输出main.o文件，但main.c不一定有main函数。
+
+* -save-temps
+    - gcc -save-temps main.c
+输出所有中间代码，如"a.out, mian.c, main.i, main.o, main.s"。
+
+* -l
+    - gcc main.c -lxx
+指定所使用到的函数库，本例中链接器会尝试链接名为libxx.a(或.so)的函数库
+此时需要把函数库放置在"/lib、/usr/lib、/usr/local/lib"这三个文件夹中。
+
+* -L
+    - gcc main.c -L/Path
+指定函数库所在的文件夹，本例中链接器会尝试搜索"/Path"文件夹。
+
+* -I
+    - gcc main.c -I/Path/include
+指定头文件所在的文件夹，本例中预编译器会尝试搜索"/Path/include"文件。
+
+* -g
+    - gcc -g main.c
+生成供调试用的可执行文件，可以在gdb中运行。
+    - strip main.o
+使用strip命令将文件中debug信息删除。 
+
+* -On
+    - gcc -O1 main.c
+编译器对代码进行优化编译，输出效率更高的可执行文件。
+'n'代表优化级别，数字越大，优化越强
+        - 1表示速度优化，即使对空间有所牺牲
+        - 2表示空间优化，即使对速度有所牺牲
+
+        不过太大的优化级别可能会产生一系列的bug，一般选择2。

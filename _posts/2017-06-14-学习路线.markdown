@@ -1,0 +1,50 @@
+title: 学习路线
+date: 2017-06-14 11:16:54
+updated: 2017-06-14 20:29:24
+categories:
+- Life
+---
+# 初步学习
+
+1. C语言入门经典
+    - C语言深入：《c和指针》，《c缺陷和陷阱》，《c专家编程》。
+2. Unix & Linux 大学教程
+3. Linux命令行
+4. 适当学习Python
+
+# 中级学习
+
+1. 数据结构与算法分析-C语言描述
+2. [数据结构可视化教程](https://visualgo.net/en)
+3. 算法(Java)版
+4. shell脚本
+5. 程序员的自我修养
+
+# 深入学习
+
+1. 操作系统
+2. 并行编程
+3. 代码质量
+4. 设计模式
+5. 数据挖掘
+6. 机器学习
+7. 人工智能
+
+# 学习网站
+
+## 英文
+
+[算法导论](http://open.163.com/movie/2010/12/G/F/M6UTT5U0I_M6V2T1JGF.html)
+[指导焦点](http://www.tutorialspoint.com/index.htm)
+[操作系统在线](https://www.ops-class.org/)
+[edx](https://www.edx.org/)
+
+## 中文
+[实验楼](https://www.shiyanlou.com/)
+[中国mooc](http://www.icourse163.org/)
+[编程语言学习](http://www.runoob.com/)
+[守望者](http://watchmen.cn/portal.php)
+[mooc学院](http://mooc.guokr.com/)
+[优达学城](https://cn.udacity.com/)
+[python学习资料](http://blog.csdn.net/xc5683/article/details/10473541)
+[w3school](http://www.w3school.com.cn/index.html)

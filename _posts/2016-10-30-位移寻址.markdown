@@ -1,0 +1,45 @@
+title: 位移寻址
+date: 2016-10-30 13:41:06
+updated: 2017-02-21 16:11:27
+tags:
+- ADR
+categories:
+- Study
+- Computer
+- PL
+- Asm
+- 80x86
+- LocateMode
+---
+
+## 1 直接寻址
+
+最常见且最易理解的寻址模式是**位移寻址**，即**直接寻址**，其通过32位常量指定内存单元的位置。
+内存单元可以是源操作数，也可以是目标操作数。
+
+- 注意
+    + 如果源操作数是表示地址的字节变量，则把位于该内存地址的内容传送到指定的寄存器中
+    + 如果目的操作数是表示地址的字节变量，则是把指定寄存器中的内容传送到该地址单元中
+    + 位移值是相对于内存起始位置的偏移量
+    + 通过制定第一个字节的地址，也可以访问到单字和双字
+
+```asm
+//字节
+mov(byteVar, ch);   //HLA
+movb byteVar, %ch   //Gas
+mov ch, byteVar     ;MASM/TASM
+
+//单字
+mov(wordVar, ch);   //HLA
+movw wordVar, %ch   //Gas
+mov ch, wordVar     ;MASM/TASM
+
+//双字
+mov(dwordVar, ch);   //HLA
+movl dwordVar, %ch   //Gas
+mov ch, dwordVar     ;MASM/TASM
+```
+
+### 1.1 用于访问静态变量
+
+位移寻址模式适合用于访问简单的标量变量，高级语言程序中通常使用这种寻址模式访问静态变量或全局变量。

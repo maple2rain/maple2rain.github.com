@@ -1,0 +1,49 @@
+title: 执行数学运算
+date: 2017-01-05 16:57:28
+updated: 2017-01-05 17:02:58
+tags:
+- Linux Shell
+categories:
+- Study
+- Computer
+- OS
+- Linux
+- API
+- Shell
+- Special Symbol
+---
+## 1 expr命令
+
+**expr**命令允许在命令行上处理数学表达式，格式为：
+
+```bash
+$ expr expression
+value
+```
+如执行加法运算：
+![](../post_img/586e0a87ab6441209e0048a1)
+
+| 操作符 | 描述 |
+|--------|------|
+| arg1 \| arg2      |  如果没有参数是null或零值，返回arg1；否则返回arg2     |
+| arg1 & arg2              | 如果没有参数是null或零值，返回arg1；否则返回0 |
+| arg1 < arg2              | 如果arg1小于arg2，返回1；否则返回0            |
+| arg1 <= arg2             | 如果arg1小于或等于arg2，返回1；否则返回0      |
+| arg1 = arg2              | 如果arg1等于arg2，返回1；否则返回0            |
+| arg1 != arg2             | 如果arg1不等于arg2，返回1；否则返回0          |
+| arg1 >= arg2             | 如果arg1大于或等于arg2，返回1；否则返回0      |
+| arg1 > arg2              | 如果arg1大于arg2，返回1；否则返回0            |
+| arg1 + arg2              | 执行加法运算，返回算术运算和                  |
+| arg1 - arg2              | 执行减法运算，返回算术运算差                  |
+| arg1 * arg2              | 执行乘法运算，返回算术运算积                  |
+| arg1 / arg2              | 执行除法运算，返回算术运算商                  |
+| arg1 % arg2              | 执行模运算，返回算术余数                      |
+| substr STRING POS LENGTH | 返回起始位置为POS、长度为LENGTH个字符的字串   |
+| index STRING CHARS       | 返回STRING中出现CHARS中任一字符的第一个位置   |
+| length STRING            | 返回字符串STRING的长度                        |
+| \+ TOKEN                  | 将TOKEN解释为字符串，即使他是关键字           |
+
+- 注意
+
+    许多**expr**命令操作符在**shell**中有其他意思，如或运算符**|**同时也是管道符号，因此在使用时需用转义字符反斜线**\\**来识别这些符号。
+    同样，要将一个数学算式的结果赋给一个变量，需要用到反引号**`**。
