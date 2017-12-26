@@ -6,9 +6,9 @@ code{
     margin: 0 2px;
     font-size: 90%;
     border-radius: 3px;
-    color: #000;
-    background-color: rgba(0, 0, 0, 0.06);
-    border: 1px solid #d7d0d2;
+    color: crimson;
+    background-color: rgba(238, 238, 238, 1);
+    border: 1px solid #ccc;
     font-family: Monaco,Menlo,"Microsoft YaHei Mono",Consolas,"Courier New",monospace,sans-serif;
 }
 
@@ -42,7 +42,7 @@ pre {
     .o { color: #f92672 } /* Operator */
     .p { color: #f8f8f2 } /* Punctuation */
     .cm { color: #75715e } /* Comment.Multiline */
-    .cp { color: #75715e } /* Comment.Preproc */
+    .cp { color: #1a7c06 } /* Comment.Preproc */
     .c1 { color: #75715e } /* Comment.Single */
     .cs { color: #75715e } /* Comment.Special */
     .ge { font-style: italic } /* Generic.Emph */
