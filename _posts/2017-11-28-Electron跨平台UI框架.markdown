@@ -14,7 +14,7 @@ author: LPF
 
 本文初步介绍`Electron`为何物，并且介绍部分环境搭建及后续打包等操作。
 
-![](../post_img/5a1d20beab64416ff30029b6)
+![](../post_img/5a1d20beab64416ff30029b6.png)
 
 
 
@@ -148,7 +148,7 @@ $ sudo apt installl npm
 
 ## 使用国内镜像安装
 
-设置代理为国内地址，通常使用阿里云提供的淘宝镜像:https://npm.taobao.org/或者腾讯的镜像:https://gems.ruby-china.org/，安装某一`package`时使用代理地址： 
+设置代理为国内地址，通常使用阿里云提供的淘宝镜像: https://npm.taobao.org/ 或者腾讯的镜像: https://gems.ruby-china.org/，安装某一`package`时使用代理地址： 
 
 ```sh
 npm install -g package --registry=https://registry.npm.taobao.org
@@ -189,7 +189,7 @@ electron .
 ```
 
 生成应用如下，展示的界面其实就是electron-quick-start目录下index.html的布局界面。
-![](../post_img/5a1d2d4dab64416ff3002d49)
+![](../post_img/5a1d2d4dab64416ff3002d49.png)
 
 ## Demo
 
